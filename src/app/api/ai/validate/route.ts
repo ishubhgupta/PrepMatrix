@@ -45,20 +45,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if we got a valid response
-    if (text && text.length > 0) {
-      return NextResponse.json({ 
-        success: true, 
+    if (text && text.trim().length > 0) {
+      return NextResponse.json({
+        success: true,
         valid: true,
         message: 'API key is valid'
       });
     } else {
       return NextResponse.json(
-        { error: 'Invalid response from API' },
+        { error: 'Invalid or empty response from API', valid: false },
         { status: 400 }
       );
-    }
-
-  } catch (error: any) {
+    }  } catch (error: any) {
     console.error('Error validating API key:', error);
     
     // Provide more specific error messages

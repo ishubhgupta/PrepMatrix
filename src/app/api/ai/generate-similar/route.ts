@@ -80,8 +80,19 @@ Make sure:
     // Try to parse the JSON response
     let parsedQuestion;
     try {
-      // Clean the response text
+      // Clean the response text and validate it's not empty
       const cleanText = text.replace(/```json\s*|\s*```/g, '').trim();
+      
+      if (!cleanText) {
+        throw new Error('Empty response from AI model');
+      }
+
+      // Check if the response looks like JSON
+      if (!cleanText.startsWith('{') || !cleanText.endsWith('}')) {
+        console.error('Invalid JSON format from AI:', cleanText);
+        throw new Error('AI response is not in valid JSON format');
+      }
+
       parsedQuestion = JSON.parse(cleanText);
       
       // Validate the structure
@@ -129,6 +140,14 @@ Make sure:
       return NextResponse.json(
         { error: 'AI service is currently overloaded. Please try again in a few moments.' },
         { status: 503 }
+      );
+    }
+
+    // For JSON parsing errors, provide a more specific message
+    if (error.message?.includes('JSON') || error.message?.includes('parse')) {
+      return NextResponse.json(
+        { error: 'The AI service returned an invalid response. Please try again.' },
+        { status: 502 }
       );
     }
 

@@ -145,8 +145,7 @@ export function QuestionCard({
         }),
       });
 
-      const data = await response.json();
-
+      // Check if response is ok before trying to parse JSON
       if (!response.ok) {
         // If it's a 503 error (service overloaded), provide a helpful fallback
         if (response.status === 503) {
@@ -156,7 +155,26 @@ export function QuestionCard({
           setShowAIModal(true);
           return;
         }
-        throw new Error(data.error || 'Failed to generate similar question');
+        
+        // For other errors, try to get error message from response
+        let errorMessage = 'Failed to generate similar question';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // If JSON parsing fails, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Parse JSON response with error handling
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', jsonError);
+        throw new Error('Invalid response format from server. Please try again.');
       }
 
       if (data.success && data.generatedQuestion) {
@@ -238,7 +256,26 @@ export function QuestionCard({
         }),
       });
 
-      const data = await response.json();
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        let errorMessage = 'Failed to generate explanation';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Parse JSON response with error handling
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', jsonError);
+        throw new Error('Invalid response format from server. Please try again.');
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to generate explanation');

@@ -78,6 +78,11 @@ Please provide a comprehensive explanation of why this answer is correct and hel
       throw new Error('No response received from AI model');
     }
 
+    // Validate the response is not empty
+    if (!text.trim()) {
+      throw new Error('Empty response from AI model');
+    }
+
     return NextResponse.json({ 
       success: true, 
       explanation: text,
@@ -106,6 +111,14 @@ Please provide a comprehensive explanation of why this answer is correct and hel
       return NextResponse.json(
         { error: 'AI service is currently overloaded. Please try again in a few moments.' },
         { status: 503 }
+      );
+    }
+
+    // For JSON parsing errors, provide a more specific message
+    if (error.message?.includes('JSON') || error.message?.includes('parse')) {
+      return NextResponse.json(
+        { error: 'The AI service returned an invalid response. Please try again.' },
+        { status: 502 }
       );
     }
 
