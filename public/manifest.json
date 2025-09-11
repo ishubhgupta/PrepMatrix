@@ -1,0 +1,10 @@
+{
+  "name": "PrepMatrix",
+  "short_name": "PrepMatrix",
+  "description": "Master technical interviews with interactive quizzes across DBMS, Python ML, C++ OOP, and GenAI topics.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "icons": []
+}
