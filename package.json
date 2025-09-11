@@ -1,6 +1,30 @@
 {
   "name": "prepmatrix",
   "version": "1.0.0",
+  "description": "AI-powered learning platform for mastering technical subjects through interactive quizzes, intelligent explanations, and comprehensive progress tracking",
+  "homepage": "https://prep-matrix.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ishubhgupta/PrepMatrix.git"
+  },
+  "keywords": [
+    "learning-platform",
+    "ai-powered",
+    "quiz-system",
+    "education",
+    "nextjs",
+    "typescript",
+    "gemini-ai",
+    "interview-preparation",
+    "technical-subjects",
+    "dbms",
+    "machine-learning",
+    "oop",
+    "operating-systems",
+    "gen-ai"
+  ],
+  "author": "ishubhgupta",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev",

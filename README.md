@@ -4,10 +4,29 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)](https://reactjs.org/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-prep--matrix.vercel.app-brightgreen?style=flat-square&logo=vercel)](https://prep-matrix.vercel.app/)
 
 **PrepMatrix** is a modern, AI-powered learning platform designed to help students master technical subjects through interactive quizzes, intelligent explanations, and comprehensive progress tracking. Built with cutting-edge web technologies and featuring a beautiful glassmorphism UI design.
 
-![PrepMatrix Dashboard](https://via.placeholder.com/800x400/6366F1/FFFFFF?text=PrepMatrix+Dashboard)
+## 🌐 Live Demo
+
+🔗 **[Access PrepMatrix Live](https://prep-matrix.vercel.app/)**
+
+Experience the full platform with all features including AI-powered explanations, interactive quizzes, and progress tracking.
+
+## 📑 Table of Contents
+
+- [Features](#-features)
+- [Technology Stack](#️-technology-stack)
+- [Getting Started](#-getting-started)
+- [Usage Guide](#-usage-guide)
+- [AI Features](#ai-features-gemini-integration)
+- [Project Structure](#-project-structure)
+- [Adding New Content](#-adding-new-content)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+- [Roadmap](#-roadmap)
+- [License](#-license)
 
 ## ✨ Features
 
@@ -67,41 +86,48 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/prepmatrix.git
-   cd prepmatrix
+   git clone https://github.com/ishubhgupta/PrepMatrix.git
+   cd PrepMatrix
    ```
 
 2. **Install dependencies**
    ```bash
-   pnpm install
-   # or
    npm install
+   # or if you prefer pnpm
+   pnpm install
    ```
 
 3. **Set up environment variables** (optional)
    ```bash
-   # Create .env.local file
-   echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env.local
+   # Copy the example environment file
+   cp .env.example .env.local
+   
+   # Edit .env.local with your API key
+   # GEMINI_API_KEY=your_gemini_api_key_here
    ```
+   
+   > **Note:** AI features work without an API key but you can also set it through the Settings page in the app.
 
 4. **Run the development server**
    ```bash
-   pnpm dev
-   # or
    npm run dev
+   # or if you prefer pnpm
+   pnpm dev
    ```
 
 5. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
+   Navigate to [http://localhost:3000](http://localhost:3000) to see the application running locally.
+
+   **Or visit the live demo:** [https://prep-matrix.vercel.app/](https://prep-matrix.vercel.app/)
 
 ### Build for Production
 
 ```bash
-pnpm build
-pnpm start
-# or
 npm run build
 npm start
+# or if you prefer pnpm
+pnpm build
+pnpm start
 ```
 
 ## 🎮 Usage Guide
@@ -218,19 +244,38 @@ PrepMatrix/
 
 ## 🚀 Deployment
 
-### **Vercel (Recommended)**
+The application is deployed and available at: **[https://prep-matrix.vercel.app/](https://prep-matrix.vercel.app/)**
+
+### **Deploy Your Own Instance**
+
+#### **Vercel (Recommended)**
 ```bash
-pnpm build
-vercel deploy
+npm run build
+npx vercel deploy
 ```
 
-### **Static Hosting**
+Or connect your GitHub repository to Vercel for automatic deployments:
+1. Fork this repository
+2. Import your fork on [Vercel](https://vercel.com)
+3. Deploy with zero configuration
+
+#### **Other Static Hosting**
 ```bash
-pnpm build
-# Deploy 'out' folder to any static host
+npm run build
+# Deploy the 'out' folder to any static hosting service
 ```
 
 ## 🤝 Contributing
+
+We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) for details on:
+
+- 🐛 How to report bugs
+- 💡 How to suggest features  
+- 🔧 Development setup
+- 📝 Code guidelines
+- 🧪 Testing requirements
+
+### **Quick Start for Contributors**
 
 1. **Fork** the repository
 2. **Create** feature branch (`git checkout -b feature/amazing-feature`)
@@ -238,11 +283,7 @@ pnpm build
 4. **Push** to branch (`git push origin feature/amazing-feature`)
 5. **Open** Pull Request
 
-### **Development Guidelines**
-- Follow TypeScript best practices
-- Use Tailwind CSS for styling
-- Maintain component modularity
-- Test your changes thoroughly
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 📋 Roadmap
 
@@ -256,6 +297,19 @@ pnpm build
 ## 📜 License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Contributors
+
+This project exists thanks to all the people who contribute.
+
+[![Contributors](https://img.shields.io/github/contributors/ishubhgupta/PrepMatrix.svg?style=flat-square)](https://github.com/ishubhgupta/PrepMatrix/graphs/contributors)
+
+## 📈 Project Stats
+
+[![GitHub stars](https://img.shields.io/github/stars/ishubhgupta/PrepMatrix.svg?style=flat-square)](https://github.com/ishubhgupta/PrepMatrix/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/ishubhgupta/PrepMatrix.svg?style=flat-square)](https://github.com/ishubhgupta/PrepMatrix/network)
+[![GitHub issues](https://img.shields.io/github/issues/ishubhgupta/PrepMatrix.svg?style=flat-square)](https://github.com/ishubhgupta/PrepMatrix/issues)
+[![GitHub license](https://img.shields.io/github/license/ishubhgupta/PrepMatrix.svg?style=flat-square)](https://github.com/ishubhgupta/PrepMatrix/blob/main/LICENSE)
 
 ## 🙏 Acknowledgments
 
@@ -271,7 +325,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ### 💡 Ready to ace your interviews?
 
-**[🚀 Start Learning](http://localhost:3000)** | **[📖 Docs](README.md)** | **[🐛 Issues](https://github.com/yourusername/prepmatrix/issues)**
+**[🚀 Start Learning](https://prep-matrix.vercel.app/)** | **[📖 Documentation](https://github.com/ishubhgupta/PrepMatrix#readme)** | **[🐛 Report Issues](https://github.com/ishubhgupta/PrepMatrix/issues)**
 
 Made with ❤️ for developers, by developers
 
