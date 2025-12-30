@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { Question } from '@/types';
 import { useQuizStore } from '@/lib/store/quiz-store';
 import { useChatStore } from '@/lib/store/chat-store';
-import { Clock, CheckCircle, XCircle, Brain, Lightbulb, MessageCircle } from 'lucide-react';
-import Cookies from 'js-cookie';
+import { CheckCircle, XCircle, Brain, Lightbulb, MessageCircle } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { AIResponseModal } from '@/components/ui/AIResponseModal';
 import { AILoading } from '@/components/ui/AILoading';
 import { AIQuestionCard } from '@/components/ui/AIQuestionCard';
+import { AIChatModal } from '@/components/ui/AIChatModal';
 
 interface GeneratedQuestion {
   question: string;
@@ -21,21 +22,15 @@ interface QuestionCardProps {
   question: Question;
   questionNumber: number;
   totalQuestions: number;
-  onNext?: () => void;
-  onPrevious?: () => void;
 }
 
 export function QuestionCard({ 
   question, 
   questionNumber, 
-  totalQuestions,
-  onNext,
-  onPrevious 
+  totalQuestions
 }: QuestionCardProps) {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
-  const [timeSpent, setTimeSpent] = useState(0);
-  const [startTime] = useState(Date.now());
   const [mounted, setMounted] = useState(false);
   const [isGeneratingSimilar, setIsGeneratingSimilar] = useState(false);
   const [isExplaining, setIsExplaining] = useState(false);
@@ -50,6 +45,9 @@ export function QuestionCard({
   // AI Interactive Question states
   const [showAIQuestion, setShowAIQuestion] = useState(false);
   const [generatedQuestion, setGeneratedQuestion] = useState<GeneratedQuestion | null>(null);
+  
+  // AI Chat Modal state
+  const [showChatModal, setShowChatModal] = useState(false);
 
   const { answerQuestion, getQuestionState } = useQuizStore();
   const { isGeminiEnabled } = useChatStore();
@@ -58,25 +56,30 @@ export function QuestionCard({
   // Get correct answer index
   const correctAnswerIndex = question.options.findIndex(option => option.correct);
 
+  // Reset local state when store state changes (e.g., after reset)
+  useEffect(() => {
+    const currentState = getQuestionState(question.id);
+    if (!currentState.answered) {
+      // Question was reset, clear local state
+      setSelectedOption(null);
+      setShowAnswer(false);
+    } else if (currentState.answered) {
+      // Question has been answered, restore state
+      setSelectedOption(currentState.selectedOption);
+      setShowAnswer(true);
+    }
+  }, [state.answered, question.id, getQuestionState]);
+
   useEffect(() => {
     setMounted(true);
     
     // Restore previous state if exists
-    if (state && state.answered) {
-      setSelectedOption(state.selectedOption);
+    const currentState = getQuestionState(question.id);
+    if (currentState && currentState.answered) {
+      setSelectedOption(currentState.selectedOption);
       setShowAnswer(true);
-      setTimeSpent(state.timeSpent);
     }
-
-    // Start timer
-    const timer = setInterval(() => {
-      if (!showAnswer) {
-        setTimeSpent(Date.now() - startTime);
-      }
-    }, 100);
-
-    return () => clearInterval(timer);
-  }, [question.id, state, showAnswer, startTime]);
+  }, [question.id, getQuestionState]);
 
   const handleAnswerSelect = (optionIndex: number) => {
     if (showAnswer) return;
@@ -86,21 +89,8 @@ export function QuestionCard({
   const handleSubmit = () => {
     if (selectedOption === null || showAnswer) return;
     
-    const finalTimeSpent = Date.now() - startTime;
-    
     setShowAnswer(true);
-    answerQuestion(question.id, selectedOption, finalTimeSpent);
-  };
-
-  const formatTime = (ms: number) => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    
-    if (minutes > 0) {
-      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-    return `${remainingSeconds}s`;
+    answerQuestion(question.id, selectedOption, 0);
   };
 
   const getOptionColor = (optionIndex: number) => {
@@ -120,10 +110,9 @@ export function QuestionCard({
   };
 
   const generateSimilarQuestion = async () => {
-    const apiKey = Cookies.get('gemini-api-key');
-    if (!isGeminiEnabled() || !apiKey) {
+    if (!isGeminiEnabled()) {
       setAIModalTitle('Configuration Required');
-      setAIModalContent('Please configure your Gemini API key in settings first to use AI features.');
+      setAIModalContent('AI features require configuration. Please check that NEXT_PUBLIC_GEMINI_API_KEY is set in your .env.local file.');
       setAIModalType('explanation');
       setShowAIModal(true);
       return;
@@ -137,7 +126,6 @@ export function QuestionCard({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          apiKey,
           question: question.question,
           subject: question.subject,
           topic: question.topic,
@@ -208,29 +196,10 @@ export function QuestionCard({
     }
   };
 
-  const showDemoQuestion = () => {
-    // Create a demo question based on the current question's subject
-    const demoQuestion: GeneratedQuestion = {
-      question: `Demo: Which of the following best demonstrates the concept from the original question about ${question.topic}?`,
-      options: [
-        "This is a sample option A that could be correct",
-        "This is option B showing an alternative approach", 
-        "This represents option C with a different perspective",
-        "This demonstrates option D with another valid example"
-      ],
-      correctAnswer: "B",
-      explanation: `This is a demo explanation. Option B is correct because it demonstrates the key concept from ${question.topic} in a practical way. This interactive question card shows how AI-generated questions will work once the service is available.`
-    };
-
-    setGeneratedQuestion(demoQuestion);
-    setShowAIQuestion(true);
-  };
-
   const explainLike = async (level: 'simple' | 'detailed' | 'advanced') => {
-    const apiKey = Cookies.get('gemini-api-key');
-    if (!isGeminiEnabled() || !apiKey) {
+    if (!isGeminiEnabled()) {
       setAIModalTitle('Configuration Required');
-      setAIModalContent('Please configure your Gemini API key in settings first to use AI features.');
+      setAIModalContent('AI features require configuration. Please check that NEXT_PUBLIC_GEMINI_API_KEY is set in your .env.local file.');
       setAIModalType('explanation');
       setShowAIModal(true);
       return;
@@ -248,7 +217,6 @@ export function QuestionCard({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          apiKey,
           question: question.question,
           correctAnswer: correctOption.text,
           rationale: question.rationale,
@@ -302,7 +270,7 @@ export function QuestionCard({
   };
 
   if (!mounted) {
-    return <div className="card p-6 animate-pulse">Loading...</div>;
+    return <div className="card p-6">Loading...</div>;
   }
 
   return (
@@ -326,8 +294,6 @@ export function QuestionCard({
             </span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-secondary-500 dark:text-secondary-400">
-            <Clock className="h-4 w-4" />
-            <span>{formatTime(timeSpent)}</span>
             {showAnswer && (
               <>
                 {state?.correct ? (
@@ -399,9 +365,9 @@ export function QuestionCard({
             <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
               Explanation
             </h4>
-            <p className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed">
-              {question.rationale}
-            </p>
+            <div className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed prose prose-sm prose-blue max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+              <ReactMarkdown>{question.rationale}</ReactMarkdown>
+            </div>
           </div>
 
           {/* AI Features */}
@@ -413,16 +379,6 @@ export function QuestionCard({
             >
               <Brain className="h-3 w-3" />
               <span>{isGeneratingSimilar ? 'Generating...' : 'Similar Question'}</span>
-            </button>
-
-            {/* Demo button for when API is unavailable */}
-            <button
-              onClick={showDemoQuestion}
-              className="btn btn-outline text-xs flex items-center space-x-1 border-amber-300 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20"
-              title="Try the interactive question feature with a demo question"
-            >
-              <Brain className="h-3 w-3" />
-              <span>Demo Question</span>
             </button>
             
             <div className="flex items-center space-x-1">
@@ -456,50 +412,24 @@ export function QuestionCard({
 
             <button
               onClick={() => {
-                setAIModalTitle('Chat Feature');
-                setAIModalContent('The chat feature is coming soon! This will allow you to have an interactive conversation with AI about this question, get hints, discuss concepts, and ask follow-up questions.');
-                setAIModalType('explanation');
-                setShowAIModal(true);
+                if (!isGeminiEnabled()) {
+                  setAIModalTitle('Configuration Required');
+                  setAIModalContent('AI features require configuration. Please check that NEXT_PUBLIC_GEMINI_API_KEY is set in your .env.local file.');
+                  setAIModalType('explanation');
+                  setShowAIModal(true);
+                  return;
+                }
+                setShowChatModal(true);
               }}
-              className="btn btn-secondary text-xs flex items-center space-x-1"
+              disabled={!isGeminiEnabled()}
+              className="btn btn-secondary text-xs flex items-center space-x-1 disabled:opacity-50"
             >
               <MessageCircle className="h-3 w-3" />
               <span>Discuss</span>
             </button>
           </div>
-
-          {!isGeminiEnabled() && (
-            <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
-              💡 Configure your Gemini API key in settings to enable AI features
-            </div>
-          )}
-
-          {isGeminiEnabled() && (
-            <div className="text-xs text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
-              🚀 Try "Demo Question" to preview the interactive AI question feature! When AI generates similar questions, you can answer them just like regular quiz questions.
-            </div>
-          )}
         </div>
       )}
-
-      {/* Navigation */}
-      <div className="flex justify-between pt-4 border-t">
-        <button
-          onClick={onPrevious}
-          className="btn btn-secondary"
-          disabled={questionNumber === 1}
-        >
-          Previous
-        </button>
-        
-        <button
-          onClick={onNext}
-          className="btn btn-secondary"
-          disabled={questionNumber === totalQuestions}
-        >
-          Next
-        </button>
-      </div>
 
       {/* AI Loading Overlay */}
       <AILoading 
@@ -533,8 +463,31 @@ export function QuestionCard({
           originalSubject={question.subject}
           originalTopic={question.topic}
           originalDifficulty={question.difficulty}
+          onGenerateAnother={() => {
+            // Close current and regenerate
+            setShowAIQuestion(false);
+            generateSimilarQuestion();
+          }}
+          onExplainDifferently={(explanation) => {
+            // Show the alternative explanation in a modal
+            setAIModalTitle('Alternative Explanation');
+            setAIModalContent(explanation);
+            setAIModalType('explanation');
+            setShowAIModal(true);
+          }}
         />
       )}
+
+      {/* AI Chat Modal */}
+      <AIChatModal
+        isOpen={showChatModal}
+        onClose={() => setShowChatModal(false)}
+        questionContext={{
+          question: question.question,
+          correctAnswer: question.options[correctAnswerIndex].text,
+          rationale: question.rationale,
+        }}
+      />
     </div>
   );
 }

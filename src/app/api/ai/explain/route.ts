@@ -3,12 +3,14 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function POST(request: NextRequest) {
   try {
-    const { apiKey, question, correctAnswer, rationale, level } = await request.json();
+    const { question, correctAnswer, rationale, level } = await request.json();
+
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'API key is required' },
-        { status: 400 }
+        { error: 'Gemini API key not configured' },
+        { status: 500 }
       );
     }
 
@@ -20,21 +22,21 @@ export async function POST(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     let promptSuffix = '';
     switch (level) {
       case 'simple':
-        promptSuffix = 'Explain this like I\'m a beginner. Use simple terms and avoid jargon.';
+        promptSuffix = 'Explain this like I\'m a beginner. Use simple terms and avoid jargon. Keep it under 150 words.';
         break;
       case 'detailed':
-        promptSuffix = 'Provide a detailed explanation with examples and context.';
+        promptSuffix = 'Provide a clear explanation with key points. Keep it under 200 words.';
         break;
       case 'advanced':
-        promptSuffix = 'Give an advanced, technical explanation with deeper insights.';
+        promptSuffix = 'Give a technical explanation with deeper insights. Keep it under 200 words.';
         break;
       default:
-        promptSuffix = 'Provide a clear explanation.';
+        promptSuffix = 'Provide a clear, concise explanation in under 150 words.';
     }
 
     const prompt = `Question: ${question}
@@ -43,7 +45,7 @@ Explanation: ${rationale}
 
 ${promptSuffix}
 
-Please provide a comprehensive explanation of why this answer is correct and help me understand the underlying concepts.`;
+Provide a concise explanation directly answering the question. Use bullet points or short paragraphs. No lengthy introductions or conclusions.`;
 
     // Retry logic for overloaded API
     let result;

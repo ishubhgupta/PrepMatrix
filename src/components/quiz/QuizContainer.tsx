@@ -22,7 +22,7 @@ interface QuizContainerProps {
 export function QuizContainer({ questions, subject }: QuizContainerProps) {
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>(questions);
   const [currentPage, setCurrentPage] = useState(0);
-  const { filters, setFilters } = useUIStore();
+  const { filters } = useUIStore();
 
   const questionsPerPage = 10;
   const totalPages = Math.ceil(filteredQuestions.length / questionsPerPage);
@@ -30,9 +30,6 @@ export function QuizContainer({ questions, subject }: QuizContainerProps) {
     currentPage * questionsPerPage,
     (currentPage + 1) * questionsPerPage
   );
-
-  // Get available topics for this subject
-  const availableTopics = [...new Set(questions.map(q => q.topic))].sort();
 
   useEffect(() => {
     // Apply filters
@@ -50,14 +47,17 @@ export function QuizContainer({ questions, subject }: QuizContainerProps) {
     <div className="space-y-6">
       {/* Filters */}
       <QuizFilters 
-        filters={filters}
-        onFiltersChange={setFilters}
-        availableTopics={availableTopics}
+        questions={questions} 
+        subject={subject.id}
+        onFiltersChange={() => {
+          // Filter logic is handled by the store
+        }}
       />
 
       {/* Stats */}
       <QuizStats 
-        questions={filteredQuestions}
+        totalQuestions={filteredQuestions.length}
+        subject={subject.id}
       />
 
       {/* Questions */}
@@ -68,50 +68,9 @@ export function QuizContainer({ questions, subject }: QuizContainerProps) {
             question={question}
             questionNumber={currentPage * questionsPerPage + index + 1}
             totalQuestions={filteredQuestions.length}
-            onNext={() => {
-              const nextIndex = currentPage * questionsPerPage + index + 1;
-              if (nextIndex < currentQuestions.length) {
-                // Scroll to next question
-              } else if (currentPage < totalPages - 1) {
-                setCurrentPage(currentPage + 1);
-              }
-            }}
-            onPrevious={() => {
-              const prevIndex = currentPage * questionsPerPage + index - 1;
-              if (prevIndex >= 0) {
-                // Scroll to previous question  
-              } else if (currentPage > 0) {
-                setCurrentPage(currentPage - 1);
-              }
-            }}
           />
         ))}
       </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center space-x-2">
-          <button
-            onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-            disabled={currentPage === 0}
-            className="btn btn-secondary disabled:opacity-50"
-          >
-            Previous
-          </button>
-          
-          <span className="text-sm text-secondary-600 dark:text-secondary-400">
-            Page {currentPage + 1} of {totalPages}
-          </span>
-          
-          <button
-            onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
-            disabled={currentPage === totalPages - 1}
-            className="btn btn-secondary disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
 
       {filteredQuestions.length === 0 && (
         <div className="text-center py-12">

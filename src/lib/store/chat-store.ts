@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ChatMessage, ChatSession, GeminiConfig } from '@/types';
-import Cookies from 'js-cookie';
 
 interface ChatState {
   // Gemini configuration
@@ -33,10 +32,19 @@ const generateMessageId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
 
+// Helper to get API key from environment
+const getApiKeyFromEnv = (): string | null => {
+  // In Next.js, NEXT_PUBLIC_ variables are available on client side
+  if (typeof window !== 'undefined') {
+    return process.env.NEXT_PUBLIC_GEMINI_API_KEY || null;
+  }
+  return process.env.NEXT_PUBLIC_GEMINI_API_KEY || null;
+};
+
 export const useChatStore = create<ChatState>()(
   persist(
     (set, get) => ({
-      // Initial state
+      // Initial state - will be overridden by onRehydrateStorage
       geminiConfig: {
         apiKey: null,
         enabled: false,
@@ -48,47 +56,38 @@ export const useChatStore = create<ChatState>()(
       // Actions
       setGeminiConfig: (config) => {
         const currentConfig = get().geminiConfig;
-        const newConfig = { ...currentConfig, ...config };
-        
-        // Save API key to cookie if provided
-        if (config.apiKey) {
-          Cookies.set('gemini-api-key', config.apiKey, { expires: 30 }); // 30 days
-        } else if (config.apiKey === null) {
-          Cookies.remove('gemini-api-key');
-        }
-        
-        set({ geminiConfig: newConfig });
+        set({
+          geminiConfig: { ...currentConfig, ...config },
+        });
       },
 
       validateGeminiKey: async (apiKey) => {
         try {
-          console.log('Validating Gemini API key...');
-          
-          const response = await fetch('/api/ai/validate', {
+          // Simple validation call to Gemini API
+          const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'x-goog-api-key': apiKey,
             },
-            body: JSON.stringify({ apiKey }),
+            body: JSON.stringify({
+              contents: [{
+                parts: [{ text: 'Hello' }]
+              }]
+            }),
           });
 
-          const data = await response.json();
-          console.log('API Validation Response:', { status: response.status, data });
-          
-          if (response.ok && data.success && data.valid) {
-            console.log('API key validation successful');
+          if (response.ok) {
             get().setGeminiConfig({
               apiKey,
               enabled: true,
               lastValidated: Date.now(),
             });
             return true;
-          } else {
-            console.error('Gemini API validation failed:', data.error || 'Unknown error');
-            return false;
           }
+          return false;
         } catch (error) {
-          console.error('Gemini API validation failed with error:', error);
+          console.error('Gemini API validation failed:', error);
           return false;
         }
       },
@@ -176,14 +175,20 @@ export const useChatStore = create<ChatState>()(
     {
       name: 'prepmatrix-chat',
       partialize: (state) => ({
-        geminiConfig: {
-          // Don't persist the API key for security - it should be in cookies
-          apiKey: null,
-          enabled: false,
-          lastValidated: null,
-        },
+        // Don't persist geminiConfig - always use environment variable
         chatSessions: state.chatSessions,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Set API key from environment after rehydration
+          const apiKey = getApiKeyFromEnv();
+          state.geminiConfig = {
+            apiKey,
+            enabled: !!apiKey,
+            lastValidated: apiKey ? Date.now() : null,
+          };
+        }
+      },
     }
   )
 );

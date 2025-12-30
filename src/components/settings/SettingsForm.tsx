@@ -1,47 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { useChatStore } from '@/lib/store/chat-store';
 import { useUIStore } from '@/lib/store/ui-store';
 
 export function SettingsForm() {
-  const [apiKey, setApiKey] = useState('');
-  const [isValidating, setIsValidating] = useState(false);
-  const [validationMessage, setValidationMessage] = useState('');
-  
-  const { geminiConfig, setGeminiConfig, validateGeminiKey } = useChatStore();
+  const { geminiConfig } = useChatStore();
   const { preferences, updatePreferences } = useUIStore();
-
-  const handleValidateApiKey = async () => {
-    if (!apiKey.trim()) {
-      setValidationMessage('Please enter an API key');
-      return;
-    }
-
-    setIsValidating(true);
-    setValidationMessage('Validating API key...');
-
-    try {
-      const isValid = await validateGeminiKey(apiKey);
-      
-      if (isValid) {
-        setValidationMessage('✅ API key validated successfully!');
-        setApiKey(''); // Clear the input for security
-      } else {
-        setValidationMessage('❌ Invalid API key. Please check and try again. Make sure your API key has access to the Gemini API.');
-      }
-    } catch (error) {
-      console.error('API validation error:', error);
-      setValidationMessage(`❌ Error validating API key: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setIsValidating(false);
-    }
-  };
-
-  const handleDisableAI = () => {
-    setGeminiConfig({ enabled: false, apiKey: null });
-    setValidationMessage('AI features disabled');
-  };
 
   return (
     <div className="space-y-8">
@@ -52,101 +16,32 @@ export function SettingsForm() {
         </h2>
         
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-              Gemini API Key
-            </label>
-            <div className="flex space-x-2">
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your Gemini API key"
-                className="input flex-1"
-                disabled={isValidating}
-              />
-              <button
-                onClick={handleValidateApiKey}
-                disabled={isValidating || !apiKey.trim()}
-                className="btn btn-primary"
-              >
-                {isValidating ? 'Validating...' : 'Validate & Enable'}
-              </button>
-            </div>
-            
-            {/* Manual override option */}
-            <div className="flex space-x-2 mt-2">
-              <button
-                onClick={() => {
-                  if (apiKey.trim()) {
-                    setGeminiConfig({
-                      apiKey: apiKey.trim(),
-                      enabled: true,
-                      lastValidated: Date.now(),
-                    });
-                    setValidationMessage('✅ API key saved manually (validation skipped)');
-                    setApiKey('');
-                  }
-                }}
-                disabled={!apiKey.trim()}
-                className="btn btn-secondary text-sm"
-              >
-                Skip Validation & Enable
-              </button>
-              <span className="text-xs text-secondary-500 self-center">
-                Use if validation fails but you know the key is valid
-              </span>
-            </div>
-            {validationMessage && (
-              <p className="text-sm mt-2 text-secondary-600 dark:text-secondary-400">
-                {validationMessage}
+          {geminiConfig.enabled ? (
+            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+              <p className="text-green-800 dark:text-green-200 font-medium">
+                ✅ AI features are enabled
               </p>
-            )}
-          </div>
-
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-            <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-              Privacy & Security Notice
-            </h3>
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              Your API key is stored only in your browser cookie and never sent to any server 
-              other than Google's Gemini API when you use AI features. We recommend using a 
-              restricted API key for additional security.
-            </p>
-            <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
-              Get your API key from: <a href="https://makersuite.google.com/app/apikey" 
-              target="_blank" rel="noopener noreferrer" className="underline">
-                Google AI Studio
-              </a>
-            </p>
-            <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border-l-4 border-yellow-400">
-              <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                <strong>Troubleshooting:</strong> If validation fails with a valid key, this might be due to:
-                <br />• CORS restrictions in browser (normal behavior)
-                <br />• API key permissions not including Gemini API access
-                <br />• Rate limiting or quota exceeded
-                <br />The app will still work - you can manually enable AI features if needed.
+              <p className="text-sm text-green-700 dark:text-green-300 mt-2">
+                AI-powered question generation and explanations are ready to use.
               </p>
             </div>
-          </div>
-
-          {geminiConfig.enabled && (
-            <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <div>
-                <p className="text-green-800 dark:text-green-200 font-medium">
-                  ✅ AI features are enabled
-                </p>
-                <p className="text-xs text-green-700 dark:text-green-300">
-                  Last validated: {geminiConfig.lastValidated ? 
-                    new Date(geminiConfig.lastValidated).toLocaleString() : 'Never'}
-                </p>
-              </div>
-              <button
-                onClick={handleDisableAI}
-                className="btn btn-danger text-sm"
-              >
-                Disable
-              </button>
+          ) : (
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+              <p className="text-yellow-800 dark:text-yellow-200 font-medium">
+                ⚠️ AI features are not configured
+              </p>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-2">
+                To enable AI features, add your Gemini API key to the .env.local file:
+              </p>
+              <code className="block mt-3 p-2 bg-secondary-100 dark:bg-secondary-800 rounded text-xs">
+                NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
+              </code>
+              <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
+                Get your API key from: <a href="https://makersuite.google.com/app/apikey" 
+                target="_blank" rel="noopener noreferrer" className="underline">
+                  Google AI Studio
+                </a>
+              </p>
             </div>
           )}
         </div>

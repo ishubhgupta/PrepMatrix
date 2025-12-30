@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { X, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { SimpleToast } from './Toast';
 
 interface AIResponseModalProps {
@@ -54,9 +55,9 @@ export function AIResponseModal({ isOpen, onClose, title, content, type }: AIRes
           <div className="space-y-4">
             <div>
               <h4 className="font-medium text-secondary-900 dark:text-white mb-2">Question:</h4>
-              <p className="text-secondary-700 dark:text-secondary-300">
-                {questionLine.replace('QUESTION:', '').trim()}
-              </p>
+              <div className="text-secondary-700 dark:text-secondary-300 prose prose-sm max-w-none prose-p:my-1">
+                <ReactMarkdown>{questionLine.replace('QUESTION:', '').trim()}</ReactMarkdown>
+              </div>
             </div>
             
             {options.length > 0 && (
@@ -84,9 +85,9 @@ export function AIResponseModal({ isOpen, onClose, title, content, type }: AIRes
             {explanationLine && (
               <div>
                 <h4 className="font-medium text-secondary-900 dark:text-white mb-2">Explanation:</h4>
-                <p className="text-secondary-700 dark:text-secondary-300">
-                  {explanationLine.replace('EXPLANATION:', '').trim()}
-                </p>
+                <div className="text-secondary-700 dark:text-secondary-300 prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                  <ReactMarkdown>{explanationLine.replace('EXPLANATION:', '').trim()}</ReactMarkdown>
+                </div>
               </div>
             )}
           </div>
@@ -94,14 +95,10 @@ export function AIResponseModal({ isOpen, onClose, title, content, type }: AIRes
       }
     }
 
-    // For explanations or unformatted content, show as paragraphs
+    // For explanations or unformatted content, show with markdown
     return (
-      <div className="space-y-3">
-        {text.split('\n\n').map((paragraph, index) => (
-          <p key={index} className="text-secondary-700 dark:text-secondary-300 leading-relaxed">
-            {paragraph.trim()}
-          </p>
-        ))}
+      <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0">
+        <ReactMarkdown>{text}</ReactMarkdown>
       </div>
     );
   };
@@ -118,7 +115,7 @@ export function AIResponseModal({ isOpen, onClose, title, content, type }: AIRes
       
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-2xl bg-white dark:bg-secondary-800 rounded-lg shadow-xl animate-slide-in">
+        <div className="relative w-full max-w-2xl bg-white dark:bg-secondary-800 rounded-lg shadow-xl">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-secondary-200 dark:border-secondary-700">
             <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">

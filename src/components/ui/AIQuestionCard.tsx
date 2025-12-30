@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Clock, CheckCircle, XCircle, Brain, Lightbulb, MessageCircle, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle, XCircle, Brain, Lightbulb, MessageCircle, Sparkles } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import { AIChatModal } from './AIChatModal';
 
 interface GeneratedQuestion {
   question: string;
@@ -16,6 +18,8 @@ interface AIQuestionCardProps {
   originalSubject: string;
   originalTopic: string;
   originalDifficulty: string;
+  onGenerateAnother?: () => void;
+  onExplainDifferently?: (explanation: string) => void;
 }
 
 export function AIQuestionCard({ 
@@ -23,12 +27,16 @@ export function AIQuestionCard({
   onClose, 
   originalSubject, 
   originalTopic, 
-  originalDifficulty 
+  originalDifficulty,
+  onGenerateAnother,
+  onExplainDifferently
 }: AIQuestionCardProps) {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
-  const [timeSpent, setTimeSpent] = useState(0);
-  const [startTime] = useState(Date.now());
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isExplaining, setIsExplaining] = useState(false);
+  const [alternativeExplanation, setAlternativeExplanation] = useState<string>('');
+  const [showChatModal, setShowChatModal] = useState(false);
 
   // Parse correct answer (A, B, C, or D) to index
   const correctAnswerIndex = ['A', 'B', 'C', 'D'].indexOf(generatedQuestion.correctAnswer.toUpperCase());
@@ -40,21 +48,7 @@ export function AIQuestionCard({
 
   const handleSubmit = () => {
     if (selectedOption === null || showAnswer) return;
-    
-    const finalTimeSpent = Date.now() - startTime;
-    setTimeSpent(finalTimeSpent);
     setShowAnswer(true);
-  };
-
-  const formatTime = (ms: number) => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    
-    if (minutes > 0) {
-      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-    return `${remainingSeconds}s`;
   };
 
   const getOptionColor = (optionIndex: number) => {
@@ -85,7 +79,7 @@ export function AIQuestionCard({
       
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-3xl bg-white dark:bg-secondary-800 rounded-lg shadow-xl animate-slide-in">
+        <div className="relative w-full max-w-3xl bg-white dark:bg-secondary-800 rounded-lg shadow-xl">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-secondary-200 dark:border-secondary-700">
             <div className="flex items-center space-x-3">
@@ -123,22 +117,18 @@ export function AIQuestionCard({
                   {originalTopic}
                 </span>
               </div>
-              <div className="flex items-center space-x-2 text-sm text-secondary-500 dark:text-secondary-400">
-                <Clock className="h-4 w-4" />
-                <span>{formatTime(timeSpent || Date.now() - startTime)}</span>
-                {showAnswer && (
-                  <>
-                    {isCorrect ? (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-red-500" />
-                    )}
-                    <span className={isCorrect ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
-                      {isCorrect ? 'Correct!' : 'Incorrect'}
-                    </span>
-                  </>
-                )}
-              </div>
+              {showAnswer && (
+                <div className="flex items-center space-x-2 text-sm">
+                  {isCorrect ? (
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-red-500" />
+                  )}
+                  <span className={isCorrect ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
+                    {isCorrect ? 'Correct!' : 'Incorrect'}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Question */}
@@ -196,46 +186,103 @@ export function AIQuestionCard({
                   <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
                     AI Explanation
                   </h4>
-                  <p className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed">
-                    {generatedQuestion.explanation}
-                  </p>
+                  <div className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed prose prose-sm prose-blue max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                    <ReactMarkdown>{generatedQuestion.explanation}</ReactMarkdown>
+                  </div>
                 </div>
 
                 {/* AI Features for Generated Question */}
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={() => {
-                      // Generate another similar question
-                      alert('Feature coming soon: Generate another variation of this question!');
+                    onClick={async () => {
+                      setIsGenerating(true);
+                      try {
+                        const response = await fetch('/api/ai/generate-similar', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            question: generatedQuestion.question,
+                            subject: originalSubject,
+                            topic: originalTopic,
+                            difficulty: originalDifficulty,
+                          }),
+                        });
+                        
+                        if (response.ok && onGenerateAnother) {
+                          onGenerateAnother();
+                        } else {
+                          alert('Failed to generate another question. Please try again.');
+                        }
+                      } catch (error) {
+                        alert('Error generating question. Please try again.');
+                      } finally {
+                        setIsGenerating(false);
+                      }
                     }}
-                    className="btn btn-secondary text-xs flex items-center space-x-1"
+                    disabled={isGenerating}
+                    className="btn btn-secondary text-xs flex items-center space-x-1 disabled:opacity-50"
                   >
                     <Brain className="h-3 w-3" />
-                    <span>Another Similar</span>
+                    <span>{isGenerating ? 'Generating...' : 'Another Similar'}</span>
                   </button>
                   
                   <button
-                    onClick={() => {
-                      // Explain differently
-                      alert('Feature coming soon: Get a different explanation for this answer!');
+                    onClick={async () => {
+                      setIsExplaining(true);
+                      try {
+                        const response = await fetch('/api/ai/explain', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            question: generatedQuestion.question,
+                            correctAnswer: generatedQuestion.options[correctAnswerIndex],
+                            rationale: generatedQuestion.explanation,
+                            level: 'detailed',
+                          }),
+                        });
+                        
+                        if (response.ok) {
+                          const data = await response.json();
+                          setAlternativeExplanation(data.explanation);
+                          if (onExplainDifferently) {
+                            onExplainDifferently(data.explanation);
+                          }
+                        } else {
+                          alert('Failed to generate alternative explanation. Please try again.');
+                        }
+                      } catch (error) {
+                        alert('Error generating explanation. Please try again.');
+                      } finally {
+                        setIsExplaining(false);
+                      }
                     }}
-                    className="btn btn-secondary text-xs flex items-center space-x-1"
+                    disabled={isExplaining}
+                    className="btn btn-secondary text-xs flex items-center space-x-1 disabled:opacity-50"
                   >
                     <Lightbulb className="h-3 w-3" />
-                    <span>Explain Differently</span>
+                    <span>{isExplaining ? 'Explaining...' : 'Explain Differently'}</span>
                   </button>
                   
                   <button
-                    onClick={() => {
-                      // Ask AI about this question
-                      alert('Feature coming soon: Chat with AI about this question!');
-                    }}
+                    onClick={() => setShowChatModal(true)}
                     className="btn btn-secondary text-xs flex items-center space-x-1"
                   >
                     <MessageCircle className="h-3 w-3" />
                     <span>Ask AI</span>
                   </button>
                 </div>
+                
+                {/* Alternative Explanation */}
+                {alternativeExplanation && (
+                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800 mt-4">
+                    <h4 className="font-medium text-purple-900 dark:text-purple-100 mb-2">
+                      Alternative Explanation
+                    </h4>
+                    <div className="text-purple-800 dark:text-purple-200 text-sm leading-relaxed prose prose-sm prose-purple max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                      <ReactMarkdown>{alternativeExplanation}</ReactMarkdown>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -254,6 +301,17 @@ export function AIQuestionCard({
           </div>
         </div>
       </div>
+
+      {/* AI Chat Modal */}
+      <AIChatModal
+        isOpen={showChatModal}
+        onClose={() => setShowChatModal(false)}
+        questionContext={{
+          question: generatedQuestion.question,
+          correctAnswer: generatedQuestion.options[correctAnswerIndex],
+          rationale: generatedQuestion.explanation,
+        }}
+      />
     </div>
   );
 }

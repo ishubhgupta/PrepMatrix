@@ -95,7 +95,8 @@ export const topicMappings = {
 
 // Utility functions
 export function getQuestionsBySubject(subject: string): Question[] {
-  return allQuestions.filter(q => q.subject === subject);
+  // Case-insensitive subject matching
+  return allQuestions.filter(q => q.subject.toLowerCase() === subject.toLowerCase());
 }
 
 export function getQuestionsByTopic(topic: string): Question[] {

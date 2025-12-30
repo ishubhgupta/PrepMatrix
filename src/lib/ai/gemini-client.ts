@@ -8,26 +8,48 @@ import {
 import Cookies from 'js-cookie';
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta';
-const MODEL_NAME = 'gemini-pro';
+const MODEL_NAME = 'gemini-2.5-flash';
+
+// Custom error class for Gemini-specific errors
+class GeminiError extends Error {
+  code: string;
+  retryAfter?: number;
+  quotaExceeded?: boolean;
+  details?: Record<string, unknown>;
+
+  constructor({ code, message, retryAfter, details }: {
+    code: string;
+    message: string;
+    retryAfter?: number;
+    details?: Record<string, unknown>;
+  }) {
+    super(message);
+    this.name = 'GeminiError';
+    this.code = code;
+    this.retryAfter = retryAfter;
+    this.quotaExceeded = code === 'RATE_LIMIT_EXCEEDED';
+    this.details = details;
+  }
+}
 
 class GeminiClient {
   private getApiKey(): string | null {
-    // Try to get from cookie first, then from environment (for testing)
-    return Cookies.get('gemini-api-key') || process.env.NEXT_PUBLIC_GEMINI_API_KEY || null;
+    return process.env.NEXT_PUBLIC_GEMINI_API_KEY || null;
   }
 
   private async makeRequest(endpoint: string, payload: any): Promise<any> {
     const apiKey = this.getApiKey();
     
     if (!apiKey) {
-      throw new Error('No Gemini API key found. Please add your API key in settings.');
+      throw new Error('Gemini API key not found. Please add NEXT_PUBLIC_GEMINI_API_KEY to your .env.local file.');
     }
 
     try {
-      const response = await fetch(`${GEMINI_API_BASE}/${endpoint}?key=${apiKey}`, {
+      const response = await fetch(`${GEMINI_API_BASE}/${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey,
         },
         body: JSON.stringify(payload),
       });
@@ -315,25 +337,3 @@ Respond as the tutor would to continue this educational conversation.`;
 
 // Singleton instance
 export const geminiClient = new GeminiClient();
-
-// Custom error class for Gemini-specific errors
-class GeminiError extends Error {
-  code: string;
-  retryAfter?: number;
-  quotaExceeded?: boolean;
-  details?: Record<string, unknown>;
-
-  constructor({ code, message, retryAfter, details }: {
-    code: string;
-    message: string;
-    retryAfter?: number;
-    details?: Record<string, unknown>;
-  }) {
-    super(message);
-    this.name = 'GeminiError';
-    this.code = code;
-    this.retryAfter = retryAfter;
-    this.quotaExceeded = code === 'RATE_LIMIT_EXCEEDED';
-    this.details = details;
-  }
-}

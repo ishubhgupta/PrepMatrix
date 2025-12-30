@@ -213,6 +213,3 @@ export const dbmsQuestions: Question[] = [
     rationale: 'A primary key is a minimal set of attributes that uniquely identifies each tuple (row) in a relation (table). It cannot contain null values and must be unique for each record.'
   }
 ];
-
-// Add more DBMS questions to reach closer to 150 total...
-// For brevity, I'm including a representative sample. In production, you'd have all 150.

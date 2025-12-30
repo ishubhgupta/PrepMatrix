@@ -61,7 +61,7 @@
 ### Prerequisites
 - Node.js 18+ 
 - npm or pnpm package manager
-- Google Gemini API key (optional, for AI features)
+- Google Gemini API key (required for AI features)
 
 ### Installation
 
@@ -78,11 +78,19 @@
    npm install
    ```
 
-3. **Set up environment variables** (optional)
+3. **Set up environment variables**
+   
+   Create a `.env.local` file in the root directory:
    ```bash
-   # Create .env.local file
-   echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env.local
+   cp .env.example .env.local
    ```
+   
+   Then add your Gemini API key:
+   ```env
+   NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
+   ```
+   
+   Get your free API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 
 4. **Run the development server**
    ```bash
@@ -114,10 +122,15 @@ npm start
 5. **Track Progress** - Monitor your performance and learning analytics
 
 ### **AI Features Setup**
-1. Go to **Settings** from the navigation menu
-2. Enter your **Gemini API key** from [Google AI Studio](https://makersuite.google.com/app/apikey)
-3. Click "Validate & Enable" to activate AI features
-4. Enjoy personalized explanations and question generation
+AI features are automatically enabled when you have the API key configured in your `.env.local` file. The features include:
+- **Smart Explanations** - Get personalized explanations at different complexity levels
+- **Similar Question Generation** - AI creates related practice questions based on your current question
+
+To set up:
+1. Get your free API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Add it to your `.env.local` file as `NEXT_PUBLIC_GEMINI_API_KEY`
+3. Restart your development server
+4. AI features will be automatically available in the quiz interface
 
 ### **Key Interactions**
 - **Answer Questions** - Click options and submit for immediate feedback

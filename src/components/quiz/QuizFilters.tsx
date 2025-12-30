@@ -1,149 +1,164 @@
 'use client';
 
-import { useState } from 'react';
-import { QuizFilters as QuizFiltersType } from '@/types';
+import { useState, useEffect } from 'react';
+import { Question } from '@/types';
+import { useUIStore } from '@/lib/store/ui-store';
+import { Filter, X, ChevronDown } from 'lucide-react';
 
 interface QuizFiltersProps {
-  filters: QuizFiltersType;
-  onFiltersChange: (filters: QuizFiltersType) => void;
-  availableTopics: string[];
+  questions: Question[];
+  subject: string;
+  onFiltersChange?: (filters: any) => void;
 }
 
-export function QuizFilters({ filters, onFiltersChange, availableTopics }: QuizFiltersProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+export function QuizFilters({ questions, subject, onFiltersChange }: QuizFiltersProps) {
+  const [mounted, setMounted] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const { filters, setFilters, resetFilters } = useUIStore();
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Extract unique topics from questions
+  const topics = Array.from(new Set(questions.map(q => q.topic)));
   const difficulties = ['Easy', 'Medium', 'Hard'];
 
-  const handleSubjectChange = (subject: string, checked: boolean) => {
-    const newSubjects = checked
-      ? [...filters.subjects, subject]
-      : filters.subjects.filter(s => s !== subject);
+  const handleTopicToggle = (topic: string) => {
+    const newTopics = filters.topics.includes(topic)
+      ? filters.topics.filter(t => t !== topic)
+      : [...filters.topics, topic];
     
-    onFiltersChange({ ...filters, subjects: newSubjects });
+    setFilters({ topics: newTopics });
+    onFiltersChange?.({ ...filters, topics: newTopics });
   };
 
-  const handleTopicChange = (topic: string, checked: boolean) => {
-    const newTopics = checked
-      ? [...filters.topics, topic]
-      : filters.topics.filter(t => t !== topic);
+  const handleDifficultyToggle = (difficulty: string) => {
+    const newDifficulties = filters.difficulties.includes(difficulty)
+      ? filters.difficulties.filter(d => d !== difficulty)
+      : [...filters.difficulties, difficulty];
     
-    onFiltersChange({ ...filters, topics: newTopics });
+    setFilters({ difficulties: newDifficulties });
+    onFiltersChange?.({ ...filters, difficulties: newDifficulties });
   };
 
-  const handleDifficultyChange = (difficulty: string, checked: boolean) => {
-    const newDifficulties = checked
-      ? [...filters.difficulties, difficulty]
-      : filters.difficulties.filter(d => d !== difficulty);
-    
-    onFiltersChange({ ...filters, difficulties: newDifficulties });
+  const handleReset = () => {
+    resetFilters();
+    onFiltersChange?.({ subjects: [], topics: [], difficulties: [] });
   };
 
-  const clearAllFilters = () => {
-    onFiltersChange({
-      subjects: [],
-      topics: [],
-      difficulties: [],
-    });
-  };
+  const hasActiveFilters = filters.topics.length > 0 || filters.difficulties.length > 0;
 
-  const hasActiveFilters = filters.subjects.length > 0 || filters.topics.length > 0 || filters.difficulties.length > 0;
+  if (!mounted) {
+    return (
+      <div className="mb-6">
+        <button className="btn btn-secondary">
+          <Filter className="h-4 w-4" />
+          <span>Filters</span>
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="card p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-medium text-secondary-900 dark:text-white">
-          Filters
-        </h3>
-        <div className="flex items-center space-x-2">
+    <div className="mb-6 relative">
+      {/* Filter Button */}
+      <div className="flex items-center space-x-3">
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="btn btn-secondary flex items-center space-x-2"
+        >
+          <Filter className="h-4 w-4" />
+          <span>Filters</span>
           {hasActiveFilters && (
-            <button
-              onClick={clearAllFilters}
-              className="text-sm text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-white"
-            >
-              Clear All
-            </button>
+            <span className="px-2 py-0.5 bg-primary-600 text-white text-xs font-medium rounded-full">
+              {filters.topics.length + filters.difficulties.length}
+            </span>
           )}
+          <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+        </button>
+        
+        {hasActiveFilters && (
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="text-secondary-500 dark:text-secondary-400"
+            onClick={handleReset}
+            className="flex items-center space-x-1 text-sm text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-white transition-colors"
           >
-            {isExpanded ? '−' : '+'}
+            <X className="h-4 w-4" />
+            <span>Clear all</span>
           </button>
-        </div>
+        )}
       </div>
 
-      {isExpanded && (
-        <div className="space-y-4">
-          {/* Difficulty Filter */}
-          <div>
-            <h4 className="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-              Difficulty
-            </h4>
-            <div className="space-y-2">
-              {difficulties.map((difficulty) => (
-                <label key={difficulty} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={filters.difficulties.includes(difficulty)}
-                    onChange={(e) => handleDifficultyChange(difficulty, e.target.checked)}
-                    className="w-4 h-4 text-primary-600 rounded"
-                  />
-                  <span className="text-sm text-secondary-600 dark:text-secondary-400">
-                    {difficulty}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Topics Filter */}
-          {availableTopics.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-                Topics
-              </h4>
-              <div className="space-y-2 max-h-32 overflow-y-auto">
-                {availableTopics.map((topic) => (
-                  <label key={topic} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={filters.topics.includes(topic)}
-                      onChange={(e) => handleTopicChange(topic, e.target.checked)}
-                      className="w-4 h-4 text-primary-600 rounded"
-                    />
-                    <span className="text-sm text-secondary-600 dark:text-secondary-400">
+      {/* Dropdown Panel */}
+      {showFilters && (
+        <>
+          {/* Backdrop for mobile */}
+          <div 
+            className="fixed inset-0 z-10 lg:hidden"
+            onClick={() => setShowFilters(false)}
+          />
+          
+          {/* Filter Panel */}
+          <div className="absolute top-full left-0 mt-2 w-full sm:w-[500px] bg-white dark:bg-secondary-800 rounded-lg shadow-lg border border-secondary-200 dark:border-secondary-700 p-6 z-20">
+            <div className="space-y-6">
+              {/* Topics Filter */}
+              <div>
+                <h4 className="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-3">
+                  Topics
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {topics.map((topic) => (
+                    <button
+                      key={topic}
+                      onClick={() => handleTopicToggle(topic)}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                        filters.topics.includes(topic)
+                          ? 'bg-primary-600 text-white shadow-sm'
+                          : 'bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-200 dark:hover:bg-secondary-600'
+                      }`}
+                    >
                       {topic}
-                    </span>
-                  </label>
-                ))}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Difficulty Filter */}
+              <div>
+                <h4 className="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-3">
+                  Difficulty
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {difficulties.map((difficulty) => {
+                    const colors = {
+                      Easy: filters.difficulties.includes(difficulty)
+                        ? 'bg-green-600 text-white'
+                        : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-900/50',
+                      Medium: filters.difficulties.includes(difficulty)
+                        ? 'bg-yellow-600 text-white'
+                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 hover:bg-yellow-200 dark:hover:bg-yellow-900/50',
+                      Hard: filters.difficulties.includes(difficulty)
+                        ? 'bg-red-600 text-white'
+                        : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-900/50',
+                    };
+
+                    return (
+                      <button
+                        key={difficulty}
+                        onClick={() => handleDifficultyToggle(difficulty)}
+                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all shadow-sm ${
+                          colors[difficulty as keyof typeof colors]
+                        }`}
+                      >
+                        {difficulty}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          )}
-        </div>
-      )}
-
-      {/* Active filters summary */}
-      {hasActiveFilters && (
-        <div className="pt-2 border-t">
-          <div className="flex flex-wrap gap-1">
-            {filters.difficulties.map((difficulty) => (
-              <span
-                key={difficulty}
-                className="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200 rounded text-xs"
-              >
-                {difficulty}
-              </span>
-            ))}
-            {filters.topics.map((topic) => (
-              <span
-                key={topic}
-                className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-xs"
-              >
-                {topic}
-              </span>
-            ))}
           </div>
-        </div>
+        </>
       )}
     </div>
   );

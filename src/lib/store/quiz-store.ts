@@ -23,6 +23,7 @@ interface QuizState {
   addNoteToQuestion: (questionId: string, note: string) => void;
   addGeneratedQuestion: (question: Question) => void;
   resetProgress: () => void;
+  resetSubjectProgress: (subject: string) => void;
   
   // Getters
   getQuestionState: (questionId: string) => QuestionState;
@@ -43,7 +44,8 @@ const createDefaultQuestionState = (questionId: string): QuestionState => ({
 });
 
 const createDefaultSubjectProgress = (subject: string): SubjectProgress => {
-  const subjectQuestions = allQuestions.filter(q => q.subject === subject);
+  // Case-insensitive subject matching
+  const subjectQuestions = allQuestions.filter(q => q.subject.toLowerCase() === subject.toLowerCase());
   return {
     subject,
     totalQuestions: subjectQuestions.length,
@@ -142,11 +144,25 @@ export const useQuizStore = create<QuizState>()(
         const subject = question.subject;
         const currentProgress = state.subjectProgress[subject] || createDefaultSubjectProgress(subject);
         const wasAnsweredBefore = state.questionStates[questionId]?.answered || false;
+        const wasCorrectBefore = state.questionStates[questionId]?.correct || false;
+        
+        // Only increment counts if this is the first time answering or the correctness changed
+        let answeredIncrement = 0;
+        let correctIncrement = 0;
+        
+        if (!wasAnsweredBefore) {
+          // First time answering this question
+          answeredIncrement = 1;
+          correctIncrement = correct ? 1 : 0;
+        } else if (wasCorrectBefore !== correct) {
+          // Answer correctness changed (was wrong, now correct OR was correct, now wrong)
+          correctIncrement = correct ? 1 : -1;
+        }
         
         const updatedProgress: SubjectProgress = {
           ...currentProgress,
-          answeredQuestions: wasAnsweredBefore ? currentProgress.answeredQuestions : currentProgress.answeredQuestions + 1,
-          correctAnswers: correct ? currentProgress.correctAnswers + 1 : currentProgress.correctAnswers,
+          answeredQuestions: currentProgress.answeredQuestions + answeredIncrement,
+          correctAnswers: currentProgress.correctAnswers + correctIncrement,
           lastActivity: Date.now(),
           streak: correct ? currentProgress.streak + 1 : 0,
         };
@@ -202,6 +218,29 @@ export const useQuizStore = create<QuizState>()(
           dailyStats: [],
           generatedQuestions: [],
           currentSession: null,
+        });
+      },
+
+      resetSubjectProgress: (subject) => {
+        const state = get();
+        // Get all question IDs for this subject
+        const subjectQuestionIds = [...allQuestions, ...state.generatedQuestions]
+          .filter(q => q.subject.toLowerCase() === subject.toLowerCase())
+          .map(q => q.id);
+        
+        // Remove question states for this subject
+        const updatedQuestionStates = { ...state.questionStates };
+        subjectQuestionIds.forEach(id => {
+          delete updatedQuestionStates[id];
+        });
+        
+        // Remove subject progress
+        const updatedSubjectProgress = { ...state.subjectProgress };
+        delete updatedSubjectProgress[subject];
+        
+        set({
+          questionStates: updatedQuestionStates,
+          subjectProgress: updatedSubjectProgress,
         });
       },
 

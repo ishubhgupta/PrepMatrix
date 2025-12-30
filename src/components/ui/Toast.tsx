@@ -43,7 +43,7 @@ export function Toast({ id, type, title, message, duration = 5000, onClose }: To
   };
 
   return (
-    <div className={`relative max-w-sm w-full ${backgrounds[type]} border rounded-xl shadow-lg backdrop-blur-sm transform transition-all duration-300 animate-slide-up overflow-hidden`}>
+    <div className={`relative max-w-sm w-full ${backgrounds[type]} border rounded-xl shadow-lg backdrop-blur-sm overflow-hidden`}>
       {/* Progress bar */}
       <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-primary-500 to-purple-500 animate-progress" style={{ animationDuration: `${duration}ms` }}></div>
       
@@ -111,7 +111,7 @@ export function SimpleToast({ message, type, isVisible, onClose, duration = 3000
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 animate-slide-up">
+    <div className="fixed top-4 right-4 z-50">
       <div className={`bg-gradient-to-r ${bgColors[type]} text-white px-6 py-4 rounded-xl shadow-lg flex items-center space-x-3 max-w-sm backdrop-blur-sm`}>
         {icons[type]}
         <span className="text-sm font-medium flex-1">{message}</span>

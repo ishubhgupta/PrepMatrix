@@ -1,140 +1,121 @@
 'use client';
 
-import { Question } from '@/types';
+import { useEffect, useState } from 'react';
 import { useQuizStore } from '@/lib/store/quiz-store';
+import { Target, TrendingUp, CheckCircle } from 'lucide-react';
 
 interface QuizStatsProps {
-  questions: Question[];
+  totalQuestions: number;
+  subject: string;
 }
 
-export function QuizStats({ questions }: QuizStatsProps) {
+export function QuizStats({ totalQuestions, subject }: QuizStatsProps) {
+  const [mounted, setMounted] = useState(false);
   const { questionStates } = useQuizStore();
 
-  const stats = questions.reduce((acc, question) => {
-    const state = questionStates[question.id];
-    
-    if (state?.answered) {
-      acc.answered++;
-      if (state.correct) {
-        acc.correct++;
-      }
-      acc.totalTime += state.timeSpent;
-    }
-    
-    return acc;
-  }, {
-    answered: 0,
-    correct: 0,
-    totalTime: 0,
-  });
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const accuracy = stats.answered > 0 ? (stats.correct / stats.answered) * 100 : 0;
-  const averageTime = stats.answered > 0 ? stats.totalTime / stats.answered : 0;
+  // Calculate stats from question states
+  const subjectQuestions = Object.entries(questionStates).filter(([id]) => 
+    id.startsWith(subject.toLowerCase())
+  );
 
-  const formatTime = (ms: number) => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    
-    if (minutes > 0) {
-      return `${minutes}m ${remainingSeconds}s`;
-    }
-    return `${remainingSeconds}s`;
-  };
+  const answeredQuestions = subjectQuestions.filter(([_, state]) => state.answered).length;
+  const correctAnswers = subjectQuestions.filter(([_, state]) => 
+    state.answered && state.correct
+  ).length;
+  const accuracy = answeredQuestions > 0 
+    ? Math.round((correctAnswers / answeredQuestions) * 100) 
+    : 0;
+  
+  const totalTimeSpent = subjectQuestions.reduce((total, [_, state]) => 
+    total + (state.timeSpent || 0), 0
+  );
+  const avgTimePerQuestion = answeredQuestions > 0
+    ? Math.round(totalTimeSpent / answeredQuestions / 1000)
+    : 0;
+
+  // Don't render until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-white dark:bg-secondary-800 p-4 rounded-lg shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-secondary-600 dark:text-secondary-400">Total</p>
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">--</p>
+            </div>
+            <Target className="h-8 w-8 text-primary-600 dark:text-primary-400 opacity-50" />
+          </div>
+        </div>
+        <div className="bg-white dark:bg-secondary-800 p-4 rounded-lg shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-secondary-600 dark:text-secondary-400">Answered</p>
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">--</p>
+            </div>
+            <CheckCircle className="h-8 w-8 text-blue-600 dark:text-blue-400 opacity-50" />
+          </div>
+        </div>
+        <div className="bg-white dark:bg-secondary-800 p-4 rounded-lg shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-secondary-600 dark:text-secondary-400">Accuracy</p>
+              <p className="text-2xl font-bold text-secondary-900 dark:text-white">--</p>
+            </div>
+            <TrendingUp className="h-8 w-8 text-green-600 dark:text-green-400 opacity-50" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="card p-4 space-y-4">
-      <h3 className="font-medium text-secondary-900 dark:text-white">
-        Session Stats
-      </h3>
-      
-      <div className="grid grid-cols-2 gap-4">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-            {stats.answered}
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+      {/* Total Questions */}
+      <div className="bg-white dark:bg-secondary-800 p-4 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-700">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-1">Total</p>
+            <p className="text-2xl font-bold text-secondary-900 dark:text-white">{totalQuestions}</p>
           </div>
-          <div className="text-xs text-secondary-600 dark:text-secondary-400">
-            Answered
-          </div>
-        </div>
-        
-        <div className="text-center">
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-            {accuracy.toFixed(0)}%
-          </div>
-          <div className="text-xs text-secondary-600 dark:text-secondary-400">
-            Accuracy
-          </div>
-        </div>
-        
-        <div className="text-center">
-          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-            {stats.correct}
-          </div>
-          <div className="text-xs text-secondary-600 dark:text-secondary-400">
-            Correct
-          </div>
-        </div>
-        
-        <div className="text-center">
-          <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-            {formatTime(averageTime)}
-          </div>
-          <div className="text-xs text-secondary-600 dark:text-secondary-400">
-            Avg Time
-          </div>
+          <Target className="h-8 w-8 text-primary-600 dark:text-primary-400 opacity-80" />
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div>
-        <div className="flex justify-between text-xs text-secondary-600 dark:text-secondary-400 mb-1">
-          <span>Progress</span>
-          <span>{stats.answered}/{questions.length}</span>
-        </div>
-        <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
-          <div
-            className="bg-primary-600 h-2 rounded-full transition-all"
-            style={{
-              width: `${(stats.answered / questions.length) * 100}%`,
-            }}
-          ></div>
+      {/* Answered */}
+      <div className="bg-white dark:bg-secondary-800 p-4 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-700">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-1">Answered</p>
+            <p className="text-2xl font-bold text-secondary-900 dark:text-white">{answeredQuestions}</p>
+            <p className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
+              {totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0}% complete
+            </p>
+          </div>
+          <CheckCircle className="h-8 w-8 text-blue-600 dark:text-blue-400 opacity-80" />
         </div>
       </div>
 
-      {/* Difficulty breakdown */}
-      {stats.answered > 0 && (
-        <div>
-          <h4 className="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
-            By Difficulty
-          </h4>
-          <div className="space-y-1">
-            {['Easy', 'Medium', 'Hard'].map((difficulty) => {
-              const difficultyQuestions = questions.filter(q => q.difficulty === difficulty);
-              const answeredCount = difficultyQuestions.reduce((count, q) => {
-                return count + (questionStates[q.id]?.answered ? 1 : 0);
-              }, 0);
-              const correctCount = difficultyQuestions.reduce((count, q) => {
-                const state = questionStates[q.id];
-                return count + (state?.answered && state.correct ? 1 : 0);
-              }, 0);
-              
-              if (difficultyQuestions.length === 0) return null;
-              
-              return (
-                <div key={difficulty} className="flex justify-between text-xs">
-                  <span className="text-secondary-600 dark:text-secondary-400">
-                    {difficulty}
-                  </span>
-                  <span className="text-secondary-700 dark:text-secondary-300">
-                    {correctCount}/{answeredCount} ({difficultyQuestions.length} total)
-                  </span>
-                </div>
-              );
-            })}
+      {/* Accuracy */}
+      <div className="bg-white dark:bg-secondary-800 p-4 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-700">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-1">Accuracy</p>
+            <p className="text-2xl font-bold text-secondary-900 dark:text-white">{accuracy}%</p>
+            <p className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
+              {correctAnswers}/{answeredQuestions} correct
+            </p>
           </div>
+          <TrendingUp className={`h-8 w-8 opacity-80 ${
+            accuracy >= 80 ? 'text-green-600 dark:text-green-400' :
+            accuracy >= 60 ? 'text-yellow-600 dark:text-yellow-400' :
+            'text-red-600 dark:text-red-400'
+          }`} />
         </div>
-      )}
+      </div>
     </div>
   );
 }

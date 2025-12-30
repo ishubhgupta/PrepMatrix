@@ -3,12 +3,14 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function POST(request: NextRequest) {
   try {
-    const { apiKey, question, subject, topic, difficulty } = await request.json();
+    const { question, subject, topic, difficulty } = await request.json();
+
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'API key is required' },
-        { status: 400 }
+        { error: 'Gemini API key not configured' },
+        { status: 500 }
       );
     }
 
@@ -20,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `Based on this question: "${question}"
       
@@ -34,14 +36,14 @@ Generate a similar question with the same difficulty level and topic. Return ONL
   "question": "new question text here",
   "options": ["option A text", "option B text", "option C text", "option D text"],
   "correctAnswer": "A",
-  "explanation": "brief explanation of why this answer is correct"
+  "explanation": "concise explanation in 2-3 sentences"
 }
 
 Make sure:
 - The question tests similar concepts but is not identical
 - All 4 options are plausible but only one is correct
 - The correctAnswer field contains only A, B, C, or D
-- The explanation is clear and educational
+- The explanation is clear, concise (max 3 sentences), and educational
 - Return only the JSON object, no other text`;
 
     // Retry logic for overloaded API
