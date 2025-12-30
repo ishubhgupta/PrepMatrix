@@ -87,7 +87,7 @@
    
    Then add your Gemini API key:
    ```env
-   NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
+   GEMINI_API_KEY=your_gemini_api_key_here
    ```
    
    Get your free API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
@@ -128,7 +128,7 @@ AI features are automatically enabled when you have the API key configured in yo
 
 To set up:
 1. Get your free API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Add it to your `.env.local` file as `NEXT_PUBLIC_GEMINI_API_KEY`
+2. Add it to your `.env.local` file as `GEMINI_API_KEY`
 3. Restart your development server
 4. AI features will be automatically available in the quiz interface
 

@@ -34,14 +34,14 @@ class GeminiError extends Error {
 
 class GeminiClient {
   private getApiKey(): string | null {
-    return process.env.NEXT_PUBLIC_GEMINI_API_KEY || null;
+    return process.env.GEMINI_API_KEY || null;
   }
 
   private async makeRequest(endpoint: string, payload: any): Promise<any> {
     const apiKey = this.getApiKey();
     
     if (!apiKey) {
-      throw new Error('Gemini API key not found. Please add NEXT_PUBLIC_GEMINI_API_KEY to your .env.local file.');
+      throw new Error('Gemini API key not found. Please add GEMINI_API_KEY to your .env.local file.');
     }
 
     try {

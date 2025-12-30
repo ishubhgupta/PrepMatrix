@@ -112,7 +112,7 @@ export function QuestionCard({
   const generateSimilarQuestion = async () => {
     if (!isGeminiEnabled()) {
       setAIModalTitle('Configuration Required');
-      setAIModalContent('AI features require configuration. Please check that NEXT_PUBLIC_GEMINI_API_KEY is set in your .env.local file.');
+      setAIModalContent('AI features require configuration. Please check that GEMINI_API_KEY is set in your .env.local file.');
       setAIModalType('explanation');
       setShowAIModal(true);
       return;
@@ -199,7 +199,7 @@ export function QuestionCard({
   const explainLike = async (level: 'simple' | 'detailed' | 'advanced') => {
     if (!isGeminiEnabled()) {
       setAIModalTitle('Configuration Required');
-      setAIModalContent('AI features require configuration. Please check that NEXT_PUBLIC_GEMINI_API_KEY is set in your .env.local file.');
+      setAIModalContent('AI features require configuration. Please check that GEMINI_API_KEY is set in your .env.local file.');
       setAIModalType('explanation');
       setShowAIModal(true);
       return;
@@ -414,7 +414,7 @@ export function QuestionCard({
               onClick={() => {
                 if (!isGeminiEnabled()) {
                   setAIModalTitle('Configuration Required');
-                  setAIModalContent('AI features require configuration. Please check that NEXT_PUBLIC_GEMINI_API_KEY is set in your .env.local file.');
+                  setAIModalContent('AI features require configuration. Please check that GEMINI_API_KEY is set in your .env.local file.');
                   setAIModalType('explanation');
                   setShowAIModal(true);
                   return;

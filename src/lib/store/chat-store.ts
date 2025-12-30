@@ -32,22 +32,20 @@ const generateMessageId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
 
-// Helper to get API key from environment
-const getApiKeyFromEnv = (): string | null => {
-  // In Next.js, NEXT_PUBLIC_ variables are available on client side
-  if (typeof window !== 'undefined') {
-    return process.env.NEXT_PUBLIC_GEMINI_API_KEY || null;
-  }
-  return process.env.NEXT_PUBLIC_GEMINI_API_KEY || null;
+// Helper to check if API key is configured (without exposing it)
+const isApiKeyConfigured = (): boolean => {
+  // Since API key is server-side only, we check if AI features work by trying to use them
+  // The actual validation happens in the API routes
+  return true; // Always return true, actual validation happens server-side
 };
 
 export const useChatStore = create<ChatState>()(
   persist(
     (set, get) => ({
-      // Initial state - will be overridden by onRehydrateStorage
+      // Initial state - API key is server-side only for security
       geminiConfig: {
         apiKey: null,
-        enabled: false,
+        enabled: true, // Enable by default, validation happens server-side
         lastValidated: null,
       },
       chatSessions: {},
@@ -168,8 +166,9 @@ export const useChatStore = create<ChatState>()(
       },
 
       isGeminiEnabled: () => {
-        const config = get().geminiConfig;
-        return config.enabled && config.apiKey !== null;
+        // Since API key is server-side only, we assume it's enabled
+        // Actual validation happens in API routes
+        return get().geminiConfig.enabled;
       },
     }),
     {
@@ -180,12 +179,12 @@ export const useChatStore = create<ChatState>()(
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          // Set API key from environment after rehydration
-          const apiKey = getApiKeyFromEnv();
+          // API key is server-side only for security
+          // Enable AI features by default, validation happens in API routes
           state.geminiConfig = {
-            apiKey,
-            enabled: !!apiKey,
-            lastValidated: apiKey ? Date.now() : null,
+            apiKey: null,
+            enabled: true,
+            lastValidated: Date.now(),
           };
         }
       },

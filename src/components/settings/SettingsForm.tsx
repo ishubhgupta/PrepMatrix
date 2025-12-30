@@ -34,7 +34,7 @@ export function SettingsForm() {
                 To enable AI features, add your Gemini API key to the .env.local file:
               </p>
               <code className="block mt-3 p-2 bg-secondary-100 dark:bg-secondary-800 rounded text-xs">
-                NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
+                GEMINI_API_KEY=your_api_key_here
               </code>
               <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
                 Get your API key from: <a href="https://makersuite.google.com/app/apikey" 
