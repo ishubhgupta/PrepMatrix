@@ -120,7 +120,7 @@ export function QuestionCard({
 
     setIsGeneratingSimilar(true);
     try {
-      const response = await fetch('/api/ai/generate-similar', {
+      const response = await fetch('/api/ai/generate-similar/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -211,7 +211,7 @@ export function QuestionCard({
     try {
       const correctOption = question.options[correctAnswerIndex];
       
-      const response = await fetch('/api/ai/explain', {
+      const response = await fetch('/api/ai/explain/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

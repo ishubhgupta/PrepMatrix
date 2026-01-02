@@ -197,7 +197,7 @@ export function AIQuestionCard({
                     onClick={async () => {
                       setIsGenerating(true);
                       try {
-                        const response = await fetch('/api/ai/generate-similar', {
+                        const response = await fetch('/api/ai/generate-similar/', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
@@ -230,7 +230,7 @@ export function AIQuestionCard({
                     onClick={async () => {
                       setIsExplaining(true);
                       try {
-                        const response = await fetch('/api/ai/explain', {
+                        const response = await fetch('/api/ai/explain/', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
