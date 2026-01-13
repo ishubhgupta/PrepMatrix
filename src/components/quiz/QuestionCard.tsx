@@ -312,7 +312,7 @@ export function QuestionCard({
 
       {/* Question */}
       <div>
-        <h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-4">
+        <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--text-strong)' }}>
           {question.question}
         </h3>
       </div>

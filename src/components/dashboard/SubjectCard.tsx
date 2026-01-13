@@ -31,43 +31,43 @@ export function SubjectCard({ subject }: SubjectCardProps) {
     <Link href={`/quiz/${subject.id}/`}>
       <div className="card card-hover p-6 h-full">
         <div className="flex items-start justify-between mb-4">
-          <div className={`w-12 h-12 ${subject.color} rounded-lg flex items-center justify-center`}>
-            <span className="text-white font-bold text-lg">
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}>
+            <span className="font-bold text-lg">
               {subject.name.charAt(0)}
             </span>
           </div>
-          <span className="text-xs text-secondary-500 bg-secondary-100 dark:bg-secondary-700 px-2 py-1 rounded-full">
-            {subject.totalQuestions} questions
+          <span className="text-xs px-3 py-1.5 rounded-full" style={{ background: 'rgba(0,0,0,0.04)', color: 'var(--text-muted)' }}>
+            {subject.totalQuestions}
           </span>
         </div>
         
-        <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
+        <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-strong)' }}>
           {subject.name}
         </h3>
         
-        <p className="text-sm text-secondary-600 dark:text-secondary-300 mb-4 line-clamp-2">
+        <p className="text-sm mb-4 line-clamp-2" style={{ color: 'var(--text-muted)' }}>
           {subject.description}
         </p>
         
         <div className="mt-auto">
-          <div className="flex items-center justify-between text-xs text-secondary-500 mb-2">
+          <div className="flex items-center justify-between text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
             <span>Progress</span>
-            <span>{mounted ? completionPercentage : 0}%</span>
+            <span className="font-medium">{mounted ? completionPercentage : 0}%</span>
           </div>
-          <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
+          <div className="w-full rounded-full h-2" style={{ background: 'rgba(0,0,0,0.06)' }}>
             <div 
-              className="bg-primary-600 h-2 rounded-full"
-              style={{ width: mounted ? `${completionPercentage}%` : '0%' }}
+              className="h-2 rounded-full transition-all duration-300"
+              style={{ width: mounted ? `${completionPercentage}%` : '0%', background: 'var(--accent)' }}
             />
           </div>
           
           {mounted && progress.answeredQuestions > 0 && (
             <div className="mt-3 flex items-center justify-between text-xs">
-              <span className="text-secondary-600 dark:text-secondary-400">
+              <span style={{ color: 'var(--text-muted)' }}>
                 {progress.correctAnswers}/{progress.answeredQuestions} correct
               </span>
-              <span className="text-success-600 dark:text-success-400 font-medium">
-                {Math.round(progress.accuracy * 100)}% accuracy
+              <span className="font-medium" style={{ color: '#2f9e44' }}>
+                {Math.round(progress.accuracy * 100)}%
               </span>
             </div>
           )}

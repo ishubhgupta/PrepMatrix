@@ -71,7 +71,7 @@ export function QuizFilters({ questions, subject, onFiltersChange }: QuizFilters
           <Filter className="h-4 w-4" />
           <span>Filters</span>
           {hasActiveFilters && (
-            <span className="px-2 py-0.5 bg-primary-600 text-white text-xs font-medium rounded-full">
+            <span className="px-2 py-0.5 text-xs font-medium rounded-full" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
               {filters.topics.length + filters.difficulties.length}
             </span>
           )}
@@ -81,7 +81,8 @@ export function QuizFilters({ questions, subject, onFiltersChange }: QuizFilters
         {hasActiveFilters && (
           <button
             onClick={handleReset}
-            className="flex items-center space-x-1 text-sm text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-white transition-colors"
+            className="flex items-center space-x-1 text-sm transition-colors hover:opacity-70"
+            style={{ color: 'var(--text-muted)' }}
           >
             <X className="h-4 w-4" />
             <span>Clear all</span>
@@ -99,11 +100,11 @@ export function QuizFilters({ questions, subject, onFiltersChange }: QuizFilters
           />
           
           {/* Filter Panel */}
-          <div className="absolute top-full left-0 mt-2 w-full sm:w-[500px] bg-white dark:bg-secondary-800 rounded-lg shadow-lg border border-secondary-200 dark:border-secondary-700 p-6 z-20">
+          <div className="absolute top-full left-0 mt-2 w-full sm:w-[500px] card p-6 z-20">
             <div className="space-y-6">
               {/* Topics Filter */}
               <div>
-                <h4 className="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-3">
+                <h4 className="text-xs font-medium tracking-wide uppercase mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
                   Topics
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -111,11 +112,22 @@ export function QuizFilters({ questions, subject, onFiltersChange }: QuizFilters
                     <button
                       key={topic}
                       onClick={() => handleTopicToggle(topic)}
-                      className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                         filters.topics.includes(topic)
-                          ? 'bg-primary-600 text-white shadow-sm'
-                          : 'bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300 hover:bg-secondary-200 dark:hover:bg-secondary-600'
+                          ? 'shadow-md'
+                          : 'hover:shadow-sm'
                       }`}
+                      style={
+                        filters.topics.includes(topic)
+                          ? {
+                              backgroundColor: 'var(--accent)',
+                              color: 'white',
+                            }
+                          : {
+                              backgroundColor: 'var(--accent-soft)',
+                              color: 'var(--accent)',
+                            }
+                      }
                     >
                       {topic}
                     </button>
@@ -125,30 +137,42 @@ export function QuizFilters({ questions, subject, onFiltersChange }: QuizFilters
 
               {/* Difficulty Filter */}
               <div>
-                <h4 className="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-3">
+                <h4 className="text-xs font-medium tracking-wide uppercase mb-3" style={{ color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
                   Difficulty
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {difficulties.map((difficulty) => {
+                    const isActive = filters.difficulties.includes(difficulty);
                     const colors = {
-                      Easy: filters.difficulties.includes(difficulty)
-                        ? 'bg-green-600 text-white'
-                        : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-900/50',
-                      Medium: filters.difficulties.includes(difficulty)
-                        ? 'bg-yellow-600 text-white'
-                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 hover:bg-yellow-200 dark:hover:bg-yellow-900/50',
-                      Hard: filters.difficulties.includes(difficulty)
-                        ? 'bg-red-600 text-white'
-                        : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 hover:bg-red-200 dark:hover:bg-red-900/50',
+                      Easy: {
+                        active: { bg: '#22c55e', color: 'white' },
+                        inactive: { bg: 'rgba(34, 197, 94, 0.12)', color: '#16a34a' }
+                      },
+                      Medium: {
+                        active: { bg: '#f59e0b', color: 'white' },
+                        inactive: { bg: 'rgba(245, 158, 11, 0.12)', color: '#d97706' }
+                      },
+                      Hard: {
+                        active: { bg: '#ef4444', color: 'white' },
+                        inactive: { bg: 'rgba(239, 68, 68, 0.12)', color: '#dc2626' }
+                      },
                     };
+
+                    const style = isActive 
+                      ? colors[difficulty as keyof typeof colors].active 
+                      : colors[difficulty as keyof typeof colors].inactive;
 
                     return (
                       <button
                         key={difficulty}
                         onClick={() => handleDifficultyToggle(difficulty)}
-                        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all shadow-sm ${
-                          colors[difficulty as keyof typeof colors]
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                          isActive ? 'shadow-md' : 'hover:shadow-sm'
                         }`}
+                        style={{
+                          backgroundColor: style.bg,
+                          color: style.color,
+                        }}
                       >
                         {difficulty}
                       </button>

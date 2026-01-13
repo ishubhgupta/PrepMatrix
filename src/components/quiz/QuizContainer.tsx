@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Question } from '@/types';
-import { QuestionCard } from './QuestionCard';
+import { QuestionCard } from './QuestionCard.improved';
 import { QuizFilters } from './QuizFilters';
 import { QuizStats } from './QuizStats';
 import { getFilteredQuestions } from '@/data';
@@ -52,13 +52,17 @@ export function QuizContainer({ questions, subject }: QuizContainerProps) {
       />
 
       {/* Questions */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         {filteredQuestions.map((question, index) => (
           <QuestionCard 
             key={question.id} 
             question={question}
             questionNumber={index + 1}
             totalQuestions={filteredQuestions.length}
+            onAnswerCorrect={() => {
+              // Callback when user answers correctly
+              // The QuestionCard will handle scrolling
+            }}
           />
         ))}
       </div>

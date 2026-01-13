@@ -2,6 +2,13 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { QuizFilters, QuestionState, UserPreferences } from '@/types';
 
+interface Toast {
+  id: string;
+  type: 'success' | 'error' | 'info' | 'warning';
+  message: string;
+  duration?: number;
+}
+
 interface UIState {
   // Theme and preferences
   theme: 'light' | 'dark' | 'system';
@@ -15,6 +22,9 @@ interface UIState {
   settingsOpen: boolean;
   chatDrawerOpen: boolean;
   
+  // Toast notifications
+  toasts: Toast[];
+  
   // Actions
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setSidebarOpen: (open: boolean) => void;
@@ -23,6 +33,8 @@ interface UIState {
   resetFilters: () => void;
   setSettingsOpen: (open: boolean) => void;
   setChatDrawerOpen: (open: boolean) => void;
+  showToast: (type: Toast['type'], message: string, duration?: number) => void;
+  removeToast: (id: string) => void;
 }
 
 const defaultPreferences: UserPreferences = {
@@ -51,6 +63,7 @@ export const useUIStore = create<UIState>()(
       filters: defaultFilters,
       settingsOpen: false,
       chatDrawerOpen: false,
+      toasts: [],
 
       // Actions
       setTheme: (theme) => {
@@ -90,6 +103,26 @@ export const useUIStore = create<UIState>()(
       setSettingsOpen: (open) => set({ settingsOpen: open }),
 
       setChatDrawerOpen: (open) => set({ chatDrawerOpen: open }),
+
+      showToast: (type, message, duration = 5000) => {
+        const id = `toast-${Date.now()}-${Math.random()}`;
+        set((state) => ({
+          toasts: [...state.toasts, { id, type, message, duration }],
+        }));
+
+        // Auto remove after duration
+        if (duration > 0) {
+          setTimeout(() => {
+            get().removeToast(id);
+          }, duration);
+        }
+      },
+
+      removeToast: (id) => {
+        set((state) => ({
+          toasts: state.toasts.filter((t) => t.id !== id),
+        }));
+      },
     }),
     {
       name: 'prepmatrix-ui',

@@ -22,31 +22,14 @@ export function Toast({ id, type, title, message, duration = 5000, onClose }: To
   }, [id, duration, onClose]);
 
   const icons = {
-    success: <CheckCircle className="w-6 h-6 text-success-600" />,
-    error: <XCircle className="w-6 h-6 text-danger-600" />,
-    warning: <AlertCircle className="w-6 h-6 text-warning-600" />,
-    info: <Info className="w-6 h-6 text-blue-600" />
-  };
-
-  const backgrounds = {
-    success: 'bg-success-50 dark:bg-success-900/20 border-success-200 dark:border-success-800',
-    error: 'bg-danger-50 dark:bg-danger-900/20 border-danger-200 dark:border-danger-800',
-    warning: 'bg-warning-50 dark:bg-warning-900/20 border-warning-200 dark:border-warning-800',
-    info: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-  };
-
-  const textColors = {
-    success: 'text-success-800 dark:text-success-200',
-    error: 'text-danger-800 dark:text-danger-200',
-    warning: 'text-warning-800 dark:text-warning-200',
-    info: 'text-blue-800 dark:text-blue-200'
+    success: <CheckCircle className="w-5 h-5" style={{ color: '#2f9e44' }} />,
+    error: <XCircle className="w-5 h-5" style={{ color: '#b3261e' }} />,
+    warning: <AlertCircle className="w-5 h-5" style={{ color: '#b46a1d' }} />,
+    info: <Info className="w-5 h-5" style={{ color: 'var(--accent)' }} />
   };
 
   return (
-    <div className={`relative max-w-sm w-full ${backgrounds[type]} border rounded-xl shadow-lg backdrop-blur-sm overflow-hidden`}>
-      {/* Progress bar */}
-      <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-primary-500 to-purple-500 animate-progress" style={{ animationDuration: `${duration}ms` }}></div>
-      
+    <div className="relative max-w-sm w-full rounded-2xl overflow-hidden" style={{ background: 'var(--bg-card)', boxShadow: 'var(--shadow-soft)' }}>
       <div className="p-4">
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0 mt-0.5">
@@ -54,11 +37,11 @@ export function Toast({ id, type, title, message, duration = 5000, onClose }: To
           </div>
           
           <div className="flex-1 min-w-0">
-            <h4 className={`text-sm font-semibold ${textColors[type]} mb-1`}>
+            <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--text-strong)' }}>
               {title}
             </h4>
             {message && (
-              <p className={`text-sm ${textColors[type]} opacity-90 leading-relaxed`}>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
                 {message}
               </p>
             )}
@@ -66,7 +49,8 @@ export function Toast({ id, type, title, message, duration = 5000, onClose }: To
           
           <button
             onClick={() => onClose(id)}
-            className={`flex-shrink-0 p-1 rounded-lg transition-colors duration-200 ${textColors[type]} hover:bg-black/10 dark:hover:bg-white/10`}
+            className="flex-shrink-0 p-1 rounded-lg transition-colors duration-200 hover:bg-black/5"
+            style={{ color: 'var(--text-muted)' }}
           >
             <X className="w-4 h-4" />
           </button>

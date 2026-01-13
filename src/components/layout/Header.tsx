@@ -1,219 +1,311 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useUIStore } from '@/lib/store/ui-store';
-import { Menu, X, Settings, Moon, Sun, Monitor } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
+import { Menu, X, ChevronDown, User, LogOut, LogIn, BookOpen, AlertTriangle, TrendingUp, Calendar, Home as HomeIcon, Brain, Sparkles } from 'lucide-react';
 
 export function Header() {
-  const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { theme, setTheme } = useUIStore();
+  const [subjectDropdownOpen, setSubjectDropdownOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const pathname = usePathname();
+  const { data: session, status } = useSession();
+  
+  const subjectRef = useRef<HTMLDivElement>(null);
+  const userRef = useRef<HTMLDivElement>(null);
+
+  const subjects = [
+    { name: 'DBMS', path: '/quiz/DBMS' },
+    { name: 'Python ML', path: '/quiz/PythonML' },
+    { name: 'C++ OOP', path: '/quiz/CppOOP' },
+    { name: 'GenAI & LLMs', path: '/quiz/GenAI' },
+    { name: 'Operating Systems', path: '/quiz/OS' },
+  ];
+
+  const isActive = (path: string) => {
+    if (path === '/') return pathname === '/';
+    return pathname.startsWith(path);
+  };
 
   useEffect(() => {
-    setMounted(true);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (subjectRef.current && !subjectRef.current.contains(event.target as Node)) {
+        setSubjectDropdownOpen(false);
+      }
+      if (userRef.current && !userRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleThemeToggle = () => {
-    const themes = ['light', 'dark', 'system'] as const;
-    const currentIndex = themes.indexOf(theme);
-    const nextTheme = themes[(currentIndex + 1) % themes.length];
-    setTheme(nextTheme);
-  };
-
-  const getThemeIcon = () => {
-    if (!mounted) {
-      return <Monitor className="w-5 h-5" />;
-    }
-    switch (theme) {
-      case 'light':
-        return <Sun className="w-5 h-5" />;
-      case 'dark':
-        return <Moon className="w-5 h-5" />;
-      default:
-        return <Monitor className="w-5 h-5" />;
-    }
-  };
-
   return (
-    <header className="sticky top-0 z-50 bg-white dark:bg-secondary-900 border-b border-secondary-200 dark:border-secondary-700 shadow-sm">
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 bg-[color:var(--bg-bone)]/95 backdrop-blur-md shadow-[var(--shadow-softer)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo and Navigation */}
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">P</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-bold bg-gradient-to-r from-secondary-900 to-primary-600 dark:from-white dark:to-primary-400 bg-clip-text text-transparent">
-                  PrepMatrix
-                </span>
-                <span className="text-xs text-secondary-500 dark:text-secondary-400 -mt-1">
-                  AI-Powered Learning
-                </span>
-              </div>
-            </Link>
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 rounded-xl bg-[color:var(--accent)] text-white font-bold text-sm flex items-center justify-center shadow-[var(--shadow-softer)] transition-transform group-hover:scale-105">
+              PM
+            </div>
+            <span className="text-lg font-bold tracking-tight hidden sm:block" style={{ color: 'var(--text-strong)' }}>
+              PrepMatrix
+            </span>
+          </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:ml-8 md:flex md:space-x-1">
-              <Link
-                href="/"
-                className="relative text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 group"
-              >
-                <span className="relative z-10">Dashboard</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-purple-500 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
-              </Link>
-              <Link
-                href="/progress/"
-                className="relative text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 group"
-              >
-                <span className="relative z-10">Progress</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-purple-500 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
-              </Link>
-              <Link
-                href="/quiz/DBMS/"
-                className="relative text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 group"
-              >
-                <span className="relative z-10">DBMS</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
-              </Link>
-              <Link
-                href="/quiz/PythonML/"
-                className="relative text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 group"
-              >
-                <span className="relative z-10">Python ML</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
-              </Link>
-              <Link
-                href="/quiz/CppOOP/"
-                className="relative text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 group"
-              >
-                <span className="relative z-10">C++ OOP</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
-              </Link>
-              <Link
-                href="/quiz/GenAI/"
-                className="relative text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 group"
-              >
-                <span className="relative z-10">GenAI</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
-              </Link>
-              <Link
-                href="/quiz/OS/"
-                className="relative text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-cyan-50 dark:hover:bg-cyan-900/20 group"
-              >
-                <span className="relative z-10">OS</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-400 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
-              </Link>
-            </nav>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center space-x-3">
-            {/* Theme Toggle */}
-            <button
-              onClick={handleThemeToggle}
-              className="relative p-2.5 rounded-xl bg-secondary-100 dark:bg-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-700 transition-all duration-300 group transform hover:scale-105"
-              aria-label="Toggle theme"
-            >
-              <div className="relative">
-                {getThemeIcon()}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500 to-purple-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none"></div>
-              </div>
-            </button>
-
-            {/* Settings */}
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-1">
+            {/* Current Page Indicator */}
             <Link
-              href="/settings/"
-              className="relative p-2.5 rounded-xl bg-secondary-100 dark:bg-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-700 transition-all duration-300 group transform hover:scale-105"
-              aria-label="Open settings"
+              href="/"
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                isActive('/') && pathname === '/'
+                  ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
+                  : 'text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5'
+              }`}
             >
-              <div className="relative">
-                <Settings className="w-5 h-5 transition-transform duration-300 group-hover:rotate-90" />
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500 to-purple-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none"></div>
-              </div>
+              <HomeIcon className="w-4 h-4" />
             </Link>
 
-            {/* Mobile menu button */}
+            {/* Subject Dropdown */}
+            <div className="relative" ref={subjectRef}>
+              <button
+                onClick={() => setSubjectDropdownOpen(!subjectDropdownOpen)}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-1 ${
+                  isActive('/quiz')
+                    ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
+                    : 'text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5'
+                }`}
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>Subjects</span>
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+              
+              {subjectDropdownOpen && (
+                <div className="absolute top-full mt-2 left-0 w-48 card py-2 shadow-lg">
+                  {subjects.map((subject) => (
+                    <Link
+                      key={subject.path}
+                      href={subject.path}
+                      onClick={() => setSubjectDropdownOpen(false)}
+                      className={`block px-4 py-2 text-sm transition-colors ${
+                        isActive(subject.path)
+                          ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)] font-medium'
+                          : 'text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5'
+                      }`}
+                    >
+                      {subject.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Authenticated User Features */}
+            {status === 'authenticated' && (
+              <>
+                <Link
+                  href="/custom-quiz"
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
+                    isActive('/custom-quiz')
+                      ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
+                      : 'text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>AI Quiz</span>
+                </Link>
+
+                <Link
+                  href="/progress"
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
+                    isActive('/progress')
+                      ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
+                      : 'text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5'
+                  }`}
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span>Progress</span>
+                </Link>
+              </>
+            )}
+          </nav>
+
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-2">
+            {status === 'authenticated' ? (
+              <div className="relative hidden md:block" ref={userRef}>
+                <button
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-black/5 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--accent)' }}>
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-sm font-medium hidden lg:block" style={{ color: 'var(--text-strong)' }}>
+                    {session.user?.name?.split(' ')[0] || 'User'}
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5" style={{ color: 'var(--text-muted)' }} />
+                </button>
+
+                {userDropdownOpen && (
+                  <div className="absolute top-full mt-2 right-0 w-48 card py-2 shadow-lg">
+                    <div className="px-4 py-2 border-b border-black/5">
+                      <p className="text-sm font-medium" style={{ color: 'var(--text-strong)' }}>
+                        {session.user?.name}
+                      </p>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        {session.user?.email}
+                      </p>
+                    </div>
+                    <Link
+                      href="/analytics"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="block px-4 py-2 text-sm text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5 transition-colors flex items-center gap-2"
+                    >
+                      <TrendingUp className="w-4 h-4" />
+                      Analytics
+                    </Link>
+                    <Link
+                      href="/settings"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="block px-4 py-2 text-sm text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5 transition-colors"
+                    >
+                      Settings
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        signOut({ callbackUrl: '/' });
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center gap-2">
+                <Link href="/auth/signin" className="px-4 py-2 text-sm font-medium rounded-lg text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5 transition-colors flex items-center gap-2">
+                  <LogIn className="w-4 h-4" />
+                  <span>Sign In</span>
+                </Link>
+                <Link href="/auth/signup" className="btn btn-primary text-sm px-4 py-2">
+                  Sign Up
+                </Link>
+              </div>
+            )}
+
+            {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden relative p-2.5 rounded-xl bg-secondary-100 dark:bg-secondary-800 hover:bg-secondary-200 dark:hover:bg-secondary-700 transition-all duration-300 group transform hover:scale-105"
-              aria-label="Toggle mobile menu"
+              className="md:hidden p-2 rounded-lg hover:bg-black/5 transition-colors"
             >
-              <div className="relative">
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary-500 to-purple-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-              </div>
+              {mobileMenuOpen ? (
+                <X className="w-5 h-5" style={{ color: 'var(--text-strong)' }} />
+              ) : (
+                <Menu className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+              )}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-secondary-200/50 dark:border-secondary-700/50 bg-white/95 dark:bg-secondary-900/95 backdrop-blur-xl">
-            <div className="py-4 space-y-1 px-4">
-              <Link
-                href="/"
-                className="block px-4 py-3 text-base font-medium text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/progress/"
-                className="block px-4 py-3 text-base font-medium text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Progress
-              </Link>
-              <Link
-                href="/quiz/DBMS/"
-                className="block px-4 py-3 text-base font-medium text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                DBMS
-              </Link>
-              <Link
-                href="/quiz/PythonML/"
-                className="block px-4 py-3 text-base font-medium text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Python ML
-              </Link>
-              <Link
-                href="/quiz/CppOOP/"
-                className="block px-4 py-3 text-base font-medium text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                C++ OOP
-              </Link>
-              <Link
-                href="/quiz/GenAI/"
-                className="block px-4 py-3 text-base font-medium text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                GenAI
-              </Link>
-              <Link
-                href="/quiz/OS/"
-                className="block px-4 py-3 text-base font-medium text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-lg hover:bg-cyan-50 dark:hover:bg-cyan-900/20"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                OS
-              </Link>
-              <Link
-                href="/settings/"
-                className="block px-4 py-3 text-base font-medium text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Settings
-              </Link>
+          <div className="md:hidden border-t border-black/5 py-4 space-y-1">
+            <Link
+              href="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block px-4 py-2 text-base font-medium rounded-lg ${
+                isActive('/') && pathname === '/'
+                  ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
+                  : 'text-[color:var(--text-muted)]'
+              }`}
+            >
+              Home
+            </Link>
+
+            <div className="px-4 py-2 text-xs font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>
+              Subjects
             </div>
+            {subjects.map((subject) => (
+              <Link
+                key={subject.path}
+                href={subject.path}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2 text-base font-medium rounded-lg ${
+                  isActive(subject.path)
+                    ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
+                    : 'text-[color:var(--text-muted)]'
+                }`}
+              >
+                {subject.name}
+              </Link>
+            ))}
+
+            {status === 'authenticated' && (
+              <>
+                <div className="px-4 py-2 text-xs font-semibold uppercase mt-4" style={{ color: 'var(--text-muted)' }}>
+                  Your Tools
+                </div>
+                <Link href="/errors" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
+                  Error Notebook
+                </Link>
+                <Link href="/confidence" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
+                  Confidence Analysis
+                </Link>
+                <Link href="/custom-quiz" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
+                  AI Quiz Generator
+                </Link>
+                <Link href="/analytics" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
+                  Analytics
+                </Link>
+                <Link href="/progress" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
+                  Progress
+                </Link>
+                <Link href="/settings" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
+                  Settings
+                </Link>
+
+                <div className="pt-4 border-t border-black/5 mt-4">
+                  <div className="px-4 py-2 text-sm font-medium" style={{ color: 'var(--text-strong)' }}>
+                    {session.user?.name}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      signOut({ callbackUrl: '/' });
+                    }}
+                    className="w-full text-left px-4 py-2 text-base font-medium text-red-600"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </>
+            )}
+
+            {status !== 'authenticated' && (
+              <div className="pt-4 border-t border-black/5 mt-4 space-y-2">
+                <Link href="/auth/signin" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium text-[color:var(--text-muted)]">
+                  Sign In
+                </Link>
+                <Link href="/auth/signup" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium text-[color:var(--accent)] bg-[color:var(--accent-soft)] rounded-lg">
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </div>
     </header>
   );
 }
+
+export default Header;

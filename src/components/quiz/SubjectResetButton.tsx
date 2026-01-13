@@ -35,7 +35,8 @@ export function SubjectResetButton({ subjectId, subjectName }: SubjectResetButto
     <>
       <button
         onClick={() => setShowConfirmation(true)}
-        className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors border border-red-200 dark:border-red-800"
+        className="flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-opacity hover:opacity-70 border"
+        style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)', backgroundColor: 'rgba(239, 68, 68, 0.05)' }}
         title="Reset progress for this subject"
       >
         <RotateCcw className="h-4 w-4" />
@@ -52,27 +53,27 @@ export function SubjectResetButton({ subjectId, subjectName }: SubjectResetButto
           />
 
           {/* Modal */}
-          <div className="relative w-full max-w-md bg-white dark:bg-secondary-800 rounded-lg shadow-xl p-6">
+          <div className="relative w-full max-w-md rounded-lg shadow-xl p-6" style={{ backgroundColor: 'var(--bg-card)' }}>
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0">
-                <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                  <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
+                  <AlertTriangle className="h-6 w-6" style={{ color: '#ef4444' }} />
                 </div>
               </div>
               
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text-strong)' }}>
                   Reset {subjectName} Progress?
                 </h3>
-                <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-4">
+                <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
                   This will permanently delete all your progress for this subject including:
                 </p>
-                <ul className="text-sm text-secondary-600 dark:text-secondary-400 mb-6 space-y-1 list-disc list-inside">
+                <ul className="text-sm mb-6 space-y-1 list-disc list-inside" style={{ color: 'var(--text-muted)' }}>
                   <li>All answered questions ({progress.answeredQuestions} questions)</li>
                   <li>Your accuracy stats ({Math.round(progress.accuracy * 100)}%)</li>
                   <li>All notes and flags for this subject</li>
                 </ul>
-                <p className="text-sm font-medium text-red-600 dark:text-red-400">
+                <p className="text-sm font-medium" style={{ color: '#ef4444' }}>
                   This action cannot be undone.
                 </p>
               </div>
@@ -82,13 +83,14 @@ export function SubjectResetButton({ subjectId, subjectName }: SubjectResetButto
             <div className="flex justify-end space-x-3 mt-6">
               <button
                 onClick={() => setShowConfirmation(false)}
-                className="px-4 py-2 text-sm font-medium text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded-lg transition-colors"
+                className="btn btn-secondary"
               >
                 Cancel
               </button>
               <button
                 onClick={handleReset}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-opacity hover:opacity-90"
+                style={{ backgroundColor: '#ef4444' }}
               >
                 Reset Progress
               </button>

@@ -29,7 +29,21 @@ next-env.d.ts
 .env.development.local
 .env.test.local
 .env.production.local
+.env.temp
+.env.*.local
 
+# Database and SQL files
+*.sql
+create-db.sql
+
+# Setup and temporary files
+SETUP.md
+*.temp
+*.new
+fix-prisma.sh
+fix-prisma.bat
+test-gemini.js
+deployment.md
 # Debug logs
 npm-debug.log*
 yarn-debug.log*

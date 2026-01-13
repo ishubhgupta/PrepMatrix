@@ -79,23 +79,24 @@ export function AIQuestionCard({
       
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-3xl bg-white dark:bg-secondary-800 rounded-lg shadow-xl">
+        <div className="relative w-full max-w-3xl rounded-lg shadow-xl" style={{ backgroundColor: 'var(--bg-card)' }}>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-secondary-200 dark:border-secondary-700">
+          <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'rgba(0,0,0,0.1)' }}>
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
-                <Sparkles className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-                <span className="text-lg font-semibold text-secondary-900 dark:text-white">
+                <Sparkles className="h-5 w-5" style={{ color: 'var(--accent)' }} />
+                <span className="text-lg font-semibold" style={{ color: 'var(--text-strong)' }}>
                   AI Generated Question
                 </span>
               </div>
-              <span className="px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-800 dark:text-primary-200 rounded text-xs font-medium">
+              <span className="px-2 py-1 rounded text-xs font-medium" style={{ backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}>
                 Similar to {originalSubject} - {originalTopic}
               </span>
             </div>
             <button
               onClick={onClose}
-              className="text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300 transition-colors"
+              className="transition-opacity hover:opacity-70"
+              style={{ color: 'var(--text-muted)' }}
             >
               <XCircle className="h-6 w-6" />
             </button>
@@ -133,7 +134,7 @@ export function AIQuestionCard({
 
             {/* Question */}
             <div>
-              <h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-4">
+              <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--text-strong)' }}>
                 {generatedQuestion.question}
               </h3>
             </div>
@@ -142,21 +143,37 @@ export function AIQuestionCard({
             <div className="space-y-3">
               {generatedQuestion.options.map((option, index) => {
                 const letter = String.fromCharCode(65 + index); // A, B, C, D
+                const isCorrectOption = index === correctAnswerIndex;
+                const isSelected = selectedOption === index;
+                const isWrongSelection = showAnswer && isSelected && !isCorrectOption;
+                
+                let buttonStyle = {};
+                if (!showAnswer) {
+                  buttonStyle = isSelected 
+                    ? { backgroundColor: 'var(--accent-soft)', borderColor: 'var(--accent)', color: 'var(--accent)' }
+                    : { borderColor: 'rgba(0,0,0,0.1)' };
+                } else {
+                  if (isCorrectOption) {
+                    buttonStyle = { backgroundColor: 'rgba(34, 197, 94, 0.1)', borderColor: '#22c55e', color: '#16a34a' };
+                  } else if (isWrongSelection) {
+                    buttonStyle = { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: '#ef4444', color: '#dc2626' };
+                  } else {
+                    buttonStyle = { opacity: 0.5, borderColor: 'rgba(0,0,0,0.1)' };
+                  }
+                }
+                
                 return (
                   <button
                     key={index}
                     onClick={() => handleAnswerSelect(index)}
                     disabled={showAnswer}
                     className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                      getOptionColor(index)
-                    } ${
-                      !showAnswer && !getOptionColor(index) 
-                        ? 'border-secondary-200 dark:border-secondary-700 hover:border-secondary-300 dark:hover:border-secondary-600' 
-                        : ''
+                      !showAnswer && !isSelected ? 'hover:border-gray-300' : ''
                     }`}
+                    style={buttonStyle}
                   >
                     <div className="flex items-start space-x-3">
-                      <span className="font-medium text-secondary-700 dark:text-secondary-300 mt-0.5">
+                      <span className="font-medium mt-0.5" style={{ color: 'var(--text-strong)' }}>
                         {letter})
                       </span>
                       <span className="flex-1">
@@ -288,8 +305,8 @@ export function AIQuestionCard({
           </div>
 
           {/* Footer */}
-          <div className="flex justify-between items-center p-6 border-t border-secondary-200 dark:border-secondary-700">
-            <div className="text-sm text-secondary-600 dark:text-secondary-400">
+          <div className="flex justify-between items-center p-6 border-t" style={{ borderColor: 'rgba(0,0,0,0.1)' }}>
+            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
               💡 This question was generated by AI based on the concepts from your original question
             </div>
             <button
