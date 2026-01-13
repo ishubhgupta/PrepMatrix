@@ -3,6 +3,7 @@ import { dbmsQuestions } from './dbms';
 import { pythonMLQuestions } from './python-ml';
 import { cppOOPQuestions } from './cpp-oop';
 import { genAIQuestions } from './genai';
+import { osQuestions } from './os';
 
 // Combine all questions
 export const allQuestions: Question[] = [
@@ -10,6 +11,7 @@ export const allQuestions: Question[] = [
   ...pythonMLQuestions,
   ...cppOOPQuestions,
   ...genAIQuestions,
+  ...osQuestions,
 ];
 
 // Subject metadata
@@ -41,6 +43,13 @@ export const subjects = [
     description: 'Large language models, prompt engineering, and AI applications',
     color: 'bg-orange-500',
     totalQuestions: genAIQuestions.length,
+  },
+  {
+    id: 'OS',
+    name: 'Operating Systems',
+    description: 'Processes, scheduling, memory, filesystems, and OS architecture',
+    color: 'bg-cyan-500',
+    totalQuestions: osQuestions.length,
   },
 ] as const;
 
@@ -90,6 +99,18 @@ export const topicMappings = {
     'Training & Optimization': 'Training',
     'Evaluation & Metrics': 'Evaluation',
     'Ethical AI & Safety': 'Ethics & Safety',
+  },
+  OS: {
+    A: 'OS Basics',
+    B: 'Processes & Threads',
+    C: 'CPU Scheduling',
+    D: 'Synchronization',
+    E: 'Deadlocks',
+    F: 'Memory Management',
+    G: 'Virtual Memory',
+    H: 'File Systems',
+    I: 'I/O Systems',
+    J: 'Advanced OS',
   },
 };
 

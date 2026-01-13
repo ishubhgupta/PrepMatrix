@@ -1,7 +1,7 @@
 // Core question and quiz types
 export interface Question {
   id: string;
-  subject: 'DBMS' | 'PythonML' | 'CppOOP' | 'GenAI';
+  subject: 'DBMS' | 'PythonML' | 'CppOOP' | 'GenAI' | 'OS';
   topic: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   question: string;

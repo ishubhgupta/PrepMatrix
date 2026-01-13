@@ -100,6 +100,13 @@ export function Header() {
                 <span className="relative z-10">GenAI</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
               </Link>
+              <Link
+                href="/quiz/OS/"
+                className="relative text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg hover:bg-cyan-50 dark:hover:bg-cyan-900/20 group"
+              >
+                <span className="relative z-10">OS</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-400 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
+              </Link>
             </nav>
           </div>
 
@@ -188,6 +195,13 @@ export function Header() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 GenAI
+              </Link>
+              <Link
+                href="/quiz/OS/"
+                className="block px-4 py-3 text-base font-medium text-secondary-700 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400 transition-all duration-300 rounded-lg hover:bg-cyan-50 dark:hover:bg-cyan-900/20"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                OS
               </Link>
               <Link
                 href="/settings/"

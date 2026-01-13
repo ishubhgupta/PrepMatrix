@@ -21,15 +21,7 @@ interface QuizContainerProps {
 
 export function QuizContainer({ questions, subject }: QuizContainerProps) {
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>(questions);
-  const [currentPage, setCurrentPage] = useState(0);
   const { filters } = useUIStore();
-
-  const questionsPerPage = 10;
-  const totalPages = Math.ceil(filteredQuestions.length / questionsPerPage);
-  const currentQuestions = filteredQuestions.slice(
-    currentPage * questionsPerPage,
-    (currentPage + 1) * questionsPerPage
-  );
 
   useEffect(() => {
     // Apply filters
@@ -40,7 +32,6 @@ export function QuizContainer({ questions, subject }: QuizContainerProps) {
     }).filter(q => q.subject === subject.id);
     
     setFilteredQuestions(filtered);
-    setCurrentPage(0);
   }, [filters, questions, subject.id]);
 
   return (
@@ -62,11 +53,11 @@ export function QuizContainer({ questions, subject }: QuizContainerProps) {
 
       {/* Questions */}
       <div className="space-y-4">
-        {currentQuestions.map((question, index) => (
+        {filteredQuestions.map((question, index) => (
           <QuestionCard 
             key={question.id} 
             question={question}
-            questionNumber={currentPage * questionsPerPage + index + 1}
+            questionNumber={index + 1}
             totalQuestions={filteredQuestions.length}
           />
         ))}
