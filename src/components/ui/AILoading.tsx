@@ -17,16 +17,16 @@ export function AILoading({ isVisible, message }: AILoadingProps) {
       
       {/* Loading Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative bg-white dark:bg-secondary-800 rounded-lg shadow-xl p-6 flex items-center space-x-4">
+        <div className="relative rounded-lg shadow-xl p-6 flex items-center space-x-4" style={{ backgroundColor: 'var(--bg-card)' }}>
           <div className="relative">
-            <Brain className="h-8 w-8 text-primary-600 dark:text-primary-400" />
-            <Loader2 className="absolute inset-0 h-8 w-8 text-primary-600 dark:text-primary-400 animate-spin" />
+            <Brain className="h-8 w-8" style={{ color: 'var(--accent)' }} />
+            <Loader2 className="absolute inset-0 h-8 w-8 animate-spin" style={{ color: 'var(--accent)' }} />
           </div>
           <div>
-            <p className="text-secondary-900 dark:text-white font-medium">
+            <p className="font-medium" style={{ color: 'var(--text-strong)' }}>
               AI is thinking...
             </p>
-            <p className="text-sm text-secondary-600 dark:text-secondary-400">
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
               {message}
             </p>
           </div>

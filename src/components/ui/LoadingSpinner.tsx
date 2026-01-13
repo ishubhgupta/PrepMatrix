@@ -48,14 +48,14 @@ export function LoadingSpinner({
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-secondary-900/80 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'rgba(247, 244, 239, 0.8)' }}>
         <div className="text-center">
           <div className="relative">
-            <div className={`${sizeClasses[size]} border-4 border-secondary-200 dark:border-secondary-700 border-t-transparent rounded-full animate-spin mx-auto mb-4`}></div>
+            <div className={`${sizeClasses[size]} border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4`} style={{ borderColor: 'var(--accent-soft)' }}></div>
             <div className={`absolute inset-0 ${sizeClasses[size]} border-4 ${colorClasses[color]} border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mx-auto`}></div>
           </div>
           {text && (
-            <p className={`${textSizeClasses[size]} text-secondary-600 dark:text-secondary-300 font-medium`}>
+            <p className={`${textSizeClasses[size]} font-medium`} style={{ color: 'var(--text-strong)' }}>
               {text}{dots}
             </p>
           )}
@@ -67,11 +67,11 @@ export function LoadingSpinner({
   return (
     <div className="flex items-center justify-center space-x-3">
       <div className="relative">
-        <div className={`${sizeClasses[size]} border-4 border-secondary-200 dark:border-secondary-700 border-t-transparent rounded-full animate-spin`}></div>
+        <div className={`${sizeClasses[size]} border-4 border-t-transparent rounded-full animate-spin`} style={{ borderColor: 'var(--accent-soft)' }}></div>
         <div className={`absolute inset-0 ${sizeClasses[size]} border-4 ${colorClasses[color]} border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin`}></div>
       </div>
       {text && (
-        <span className={`${textSizeClasses[size]} text-secondary-600 dark:text-secondary-300 font-medium`}>
+        <span className={`${textSizeClasses[size]} font-medium`} style={{ color: 'var(--text-strong)' }}>
           {text}{dots}
         </span>
       )}
@@ -84,16 +84,16 @@ export function SkeletonCard() {
   return (
     <div className="card p-6 animate-pulse">
       <div className="flex items-start justify-between mb-4">
-        <div className="w-12 h-12 bg-secondary-200 dark:bg-secondary-700 rounded-lg"></div>
-        <div className="w-16 h-6 bg-secondary-200 dark:bg-secondary-700 rounded-full"></div>
+        <div className="w-12 h-12 rounded-lg" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
+        <div className="w-16 h-6 rounded-full" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
       </div>
-      <div className="w-3/4 h-6 bg-secondary-200 dark:bg-secondary-700 rounded mb-2"></div>
-      <div className="w-full h-4 bg-secondary-200 dark:bg-secondary-700 rounded mb-4"></div>
+      <div className="w-3/4 h-6 rounded mb-2" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
+      <div className="w-full h-4 rounded mb-4" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
       <div className="space-y-2">
-        <div className="w-full h-2 bg-secondary-200 dark:bg-secondary-700 rounded"></div>
+        <div className="w-full h-2 rounded" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
         <div className="flex justify-between">
-          <div className="w-16 h-3 bg-secondary-200 dark:bg-secondary-700 rounded"></div>
-          <div className="w-12 h-3 bg-secondary-200 dark:bg-secondary-700 rounded"></div>
+          <div className="w-16 h-3 rounded" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
+          <div className="w-12 h-3 rounded" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
         </div>
       </div>
     </div>
@@ -105,9 +105,9 @@ export function SkeletonStats() {
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
       {[...Array(5)].map((_, i) => (
         <div key={i} className="card p-6 text-center animate-pulse">
-          <div className="w-12 h-8 bg-secondary-200 dark:bg-secondary-700 rounded mx-auto mb-2"></div>
-          <div className="w-16 h-4 bg-secondary-200 dark:bg-secondary-700 rounded mx-auto mb-1"></div>
-          <div className="w-20 h-3 bg-secondary-200 dark:bg-secondary-700 rounded mx-auto"></div>
+          <div className="w-12 h-8 rounded mx-auto mb-2" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
+          <div className="w-16 h-4 rounded mx-auto mb-1" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
+          <div className="w-20 h-3 rounded mx-auto" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
         </div>
       ))}
     </div>

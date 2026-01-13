@@ -54,18 +54,18 @@ export function AIResponseModal({ isOpen, onClose, title, content, type }: AIRes
         return (
           <div className="space-y-4">
             <div>
-              <h4 className="font-medium text-secondary-900 dark:text-white mb-2">Question:</h4>
-              <div className="text-secondary-700 dark:text-secondary-300 prose prose-sm max-w-none prose-p:my-1">
+              <h4 className="font-medium mb-2" style={{ color: 'var(--text-strong)' }}>Question:</h4>
+              <div className="prose prose-sm max-w-none prose-p:my-1" style={{ color: 'var(--text-strong)' }}>
                 <ReactMarkdown>{questionLine.replace('QUESTION:', '').trim()}</ReactMarkdown>
               </div>
             </div>
             
             {options.length > 0 && (
               <div>
-                <h4 className="font-medium text-secondary-900 dark:text-white mb-2">Options:</h4>
+                <h4 className="font-medium mb-2" style={{ color: 'var(--text-strong)' }}>Options:</h4>
                 <div className="space-y-2">
                   {options.map((option, index) => (
-                    <p key={index} className="text-secondary-700 dark:text-secondary-300 pl-2">
+                    <p key={index} style={{ color: 'var(--text-strong)' }} className="pl-2">
                       {option}
                     </p>
                   ))}
@@ -75,8 +75,8 @@ export function AIResponseModal({ isOpen, onClose, title, content, type }: AIRes
             
             {correctLine && (
               <div>
-                <h4 className="font-medium text-secondary-900 dark:text-white mb-2">Correct Answer:</h4>
-                <p className="text-green-700 dark:text-green-300 font-medium">
+                <h4 className="font-medium mb-2" style={{ color: 'var(--text-strong)' }}>Correct Answer:</h4>
+                <p className="font-medium" style={{ color: '#22c55e' }}>
                   {correctLine.replace('CORRECT:', '').trim()}
                 </p>
               </div>
@@ -84,8 +84,8 @@ export function AIResponseModal({ isOpen, onClose, title, content, type }: AIRes
             
             {explanationLine && (
               <div>
-                <h4 className="font-medium text-secondary-900 dark:text-white mb-2">Explanation:</h4>
-                <div className="text-secondary-700 dark:text-secondary-300 prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
+                <h4 className="font-medium mb-2" style={{ color: 'var(--text-strong)' }}>Explanation:</h4>
+                <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0" style={{ color: 'var(--text-strong)' }}>
                   <ReactMarkdown>{explanationLine.replace('EXPLANATION:', '').trim()}</ReactMarkdown>
                 </div>
               </div>
@@ -115,23 +115,25 @@ export function AIResponseModal({ isOpen, onClose, title, content, type }: AIRes
       
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-2xl bg-white dark:bg-secondary-800 rounded-lg shadow-xl">
+        <div className="relative w-full max-w-2xl rounded-lg shadow-xl" style={{ backgroundColor: 'var(--bg-card)' }}>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-secondary-200 dark:border-secondary-700">
-            <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
+          <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'rgba(0,0,0,0.1)' }}>
+            <h3 className="text-lg font-semibold" style={{ color: 'var(--text-strong)' }}>
               {title}
             </h3>
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleCopy}
-                className="p-2 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300 transition-colors"
+                className="p-2 transition-opacity hover:opacity-70"
+                style={{ color: 'var(--text-muted)' }}
                 title="Copy to clipboard"
               >
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </button>
               <button
                 onClick={onClose}
-                className="p-2 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300 transition-colors"
+                className="p-2 transition-opacity hover:opacity-70"
+                style={{ color: 'var(--text-muted)' }}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -144,7 +146,7 @@ export function AIResponseModal({ isOpen, onClose, title, content, type }: AIRes
           </div>
           
           {/* Footer */}
-          <div className="flex justify-end space-x-3 p-6 border-t border-secondary-200 dark:border-secondary-700">
+          <div className="flex justify-end space-x-3 p-6 border-t" style={{ borderColor: 'rgba(0,0,0,0.1)' }}>
             <button
               onClick={onClose}
               className="btn btn-secondary"

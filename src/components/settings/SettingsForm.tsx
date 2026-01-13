@@ -9,57 +9,21 @@ export function SettingsForm() {
 
   return (
     <div className="space-y-8">
-      {/* AI Features Section */}
-      <div className="card p-6">
-        <h2 className="text-xl font-semibold text-secondary-900 dark:text-white mb-4">
-          AI Features (Gemini)
-        </h2>
-        
-        <div className="space-y-4">
-          {geminiConfig.enabled ? (
-            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-              <p className="text-green-800 dark:text-green-200 font-medium">
-                ✅ AI features are enabled
-              </p>
-              <p className="text-sm text-green-700 dark:text-green-300 mt-2">
-                AI-powered question generation and explanations are ready to use.
-              </p>
-            </div>
-          ) : (
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
-              <p className="text-yellow-800 dark:text-yellow-200 font-medium">
-                ⚠️ AI features are not configured
-              </p>
-              <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-2">
-                To enable AI features, add your Gemini API key to the .env.local file:
-              </p>
-              <code className="block mt-3 p-2 bg-secondary-100 dark:bg-secondary-800 rounded text-xs">
-                GEMINI_API_KEY=your_api_key_here
-              </code>
-              <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
-                Get your API key from: <a href="https://makersuite.google.com/app/apikey" 
-                target="_blank" rel="noopener noreferrer" className="underline">
-                  Google AI Studio
-                </a>
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+
 
       {/* UI Preferences Section */}
       <div className="card p-6">
-        <h2 className="text-xl font-semibold text-secondary-900 dark:text-white mb-4">
+        <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-strong)' }}>
           Preferences
         </h2>
         
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <label className="font-medium text-secondary-900 dark:text-white">
+              <label className="font-medium" style={{ color: 'var(--text-strong)' }}>
                 Theme
               </label>
-              <p className="text-sm text-secondary-600 dark:text-secondary-400">
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 Choose your preferred color scheme
               </p>
             </div>
@@ -76,10 +40,10 @@ export function SettingsForm() {
 
           <div className="flex items-center justify-between">
             <div>
-              <label className="font-medium text-secondary-900 dark:text-white">
+              <label className="font-medium" style={{ color: 'var(--text-strong)' }}>
                 Show Charts
               </label>
-              <p className="text-sm text-secondary-600 dark:text-secondary-400">
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 Display visual analytics on dashboard
               </p>
             </div>
@@ -87,16 +51,17 @@ export function SettingsForm() {
               type="checkbox"
               checked={preferences.showCharts}
               onChange={(e) => updatePreferences({ showCharts: e.target.checked })}
-              className="w-4 h-4 text-primary-600 rounded"
+              className="w-4 h-4 rounded"
+              style={{ accentColor: 'var(--accent)' }}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <label className="font-medium text-secondary-900 dark:text-white">
+              <label className="font-medium" style={{ color: 'var(--text-strong)' }}>
                 Compact Cards
               </label>
-              <p className="text-sm text-secondary-600 dark:text-secondary-400">
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 Use smaller question cards
               </p>
             </div>
@@ -104,16 +69,17 @@ export function SettingsForm() {
               type="checkbox"
               checked={preferences.compactCards}
               onChange={(e) => updatePreferences({ compactCards: e.target.checked })}
-              className="w-4 h-4 text-primary-600 rounded"
+              className="w-4 h-4 rounded"
+              style={{ accentColor: 'var(--accent)' }}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <label className="font-medium text-secondary-900 dark:text-white">
+              <label className="font-medium" style={{ color: 'var(--text-strong)' }}>
                 Auto-reveal Rationale
               </label>
-              <p className="text-sm text-secondary-600 dark:text-secondary-400">
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 Automatically show explanation after answering
               </p>
             </div>
@@ -121,16 +87,17 @@ export function SettingsForm() {
               type="checkbox"
               checked={preferences.autoRevealRationale}
               onChange={(e) => updatePreferences({ autoRevealRationale: e.target.checked })}
-              className="w-4 h-4 text-primary-600 rounded"
+              className="w-4 h-4 rounded"
+              style={{ accentColor: 'var(--accent)' }}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <label className="font-medium text-secondary-900 dark:text-white">
+              <label className="font-medium" style={{ color: 'var(--text-strong)' }}>
                 Keyboard Shortcuts
               </label>
-              <p className="text-sm text-secondary-600 dark:text-secondary-400">
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 Enable keyboard navigation (J/K, 1-4, etc.)
               </p>
             </div>
@@ -138,7 +105,8 @@ export function SettingsForm() {
               type="checkbox"
               checked={preferences.keyboardShortcuts}
               onChange={(e) => updatePreferences({ keyboardShortcuts: e.target.checked })}
-              className="w-4 h-4 text-primary-600 rounded"
+              className="w-4 h-4 rounded"
+              style={{ accentColor: 'var(--accent)' }}
             />
           </div>
         </div>
@@ -146,17 +114,17 @@ export function SettingsForm() {
 
       {/* Data Management Section */}
       <div className="card p-6">
-        <h2 className="text-xl font-semibold text-secondary-900 dark:text-white mb-4">
+        <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-strong)' }}>
           Data Management
         </h2>
         
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <label className="font-medium text-secondary-900 dark:text-white">
+              <label className="font-medium" style={{ color: 'var(--text-strong)' }}>
                 Export Progress
               </label>
-              <p className="text-sm text-secondary-600 dark:text-secondary-400">
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 Download your progress and notes as JSON
               </p>
             </div>
@@ -167,10 +135,10 @@ export function SettingsForm() {
 
           <div className="flex items-center justify-between">
             <div>
-              <label className="font-medium text-secondary-900 dark:text-white">
+              <label className="font-medium" style={{ color: 'var(--text-strong)' }}>
                 Reset All Data
               </label>
-              <p className="text-sm text-secondary-600 dark:text-secondary-400">
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                 Clear all progress, preferences, and chat history
               </p>
             </div>

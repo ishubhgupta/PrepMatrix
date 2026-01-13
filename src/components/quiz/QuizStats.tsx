@@ -73,47 +73,59 @@ export function QuizStats({ totalQuestions, subject }: QuizStatsProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-      {/* Total Questions */}
-      <div className="bg-white dark:bg-secondary-800 p-4 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-700">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-1">Total</p>
-            <p className="text-2xl font-bold text-secondary-900 dark:text-white">{totalQuestions}</p>
+    <div className="card p-6 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Total Questions */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <Target className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+            <span className="text-xs font-medium tracking-wide uppercase" style={{ color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
+              Total
+            </span>
           </div>
-          <Target className="h-8 w-8 text-primary-600 dark:text-primary-400 opacity-80" />
+          <p className="text-3xl font-bold" style={{ color: 'var(--text-strong)' }}>{totalQuestions}</p>
         </div>
-      </div>
 
-      {/* Answered */}
-      <div className="bg-white dark:bg-secondary-800 p-4 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-700">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-1">Answered</p>
-            <p className="text-2xl font-bold text-secondary-900 dark:text-white">{answeredQuestions}</p>
-            <p className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
-              {totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0}% complete
-            </p>
+        {/* Answered */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <CheckCircle className="w-4 h-4" style={{ color: '#3b82f6' }} />
+            <span className="text-xs font-medium tracking-wide uppercase" style={{ color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
+              Answered
+            </span>
           </div>
-          <CheckCircle className="h-8 w-8 text-blue-600 dark:text-blue-400 opacity-80" />
+          <p className="text-3xl font-bold" style={{ color: 'var(--text-strong)' }}>{answeredQuestions}</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+            {totalQuestions > 0 ? Math.round((answeredQuestions / totalQuestions) * 100) : 0}% complete
+          </p>
         </div>
-      </div>
 
-      {/* Accuracy */}
-      <div className="bg-white dark:bg-secondary-800 p-4 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-700">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-1">Accuracy</p>
-            <p className="text-2xl font-bold text-secondary-900 dark:text-white">{accuracy}%</p>
-            <p className="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
-              {correctAnswers}/{answeredQuestions} correct
-            </p>
+        {/* Accuracy */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="w-4 h-4" style={{ color: '#22c55e' }} />
+            <span className="text-xs font-medium tracking-wide uppercase" style={{ color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
+              Accuracy
+            </span>
           </div>
-          <TrendingUp className={`h-8 w-8 opacity-80 ${
-            accuracy >= 80 ? 'text-green-600 dark:text-green-400' :
-            accuracy >= 60 ? 'text-yellow-600 dark:text-yellow-400' :
-            'text-red-600 dark:text-red-400'
-          }`} />
+          <p className="text-3xl font-bold" style={{ color: 'var(--text-strong)' }}>{accuracy}%</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+            {correctAnswers}/{answeredQuestions} correct
+          </p>
+        </div>
+
+        {/* Average Time */}
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <TrendingUp className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+            <span className="text-xs font-medium tracking-wide uppercase" style={{ color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
+              Avg Time
+            </span>
+          </div>
+          <p className="text-3xl font-bold" style={{ color: 'var(--text-strong)' }}>{avgTimePerQuestion}s</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+            per question
+          </p>
         </div>
       </div>
     </div>

@@ -133,25 +133,26 @@ Provide a concise, direct answer in under 150 words. Use bullet points for clari
       />
 
       {/* Chat Modal */}
-      <div className="relative w-full max-w-3xl h-[600px] bg-white dark:bg-secondary-800 rounded-lg shadow-xl flex flex-col">
+      <div className="relative w-full max-w-3xl h-[600px] rounded-lg shadow-xl flex flex-col" style={{ backgroundColor: 'var(--bg-card)' }}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-secondary-200 dark:border-secondary-700">
+        <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'rgba(0,0,0,0.1)' }}>
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-br from-primary-500 to-purple-500 rounded-lg">
+            <div className="p-2 rounded-lg" style={{ background: 'linear-gradient(135deg, var(--accent), #9333ea)' }}>
               <MessageCircle className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">
+              <h2 className="text-lg font-semibold" style={{ color: 'var(--text-strong)' }}>
                 AI Discussion
               </h2>
-              <p className="text-xs text-secondary-500 dark:text-secondary-400">
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                 Ask me anything about this question
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300"
+            className="p-2 transition-opacity hover:opacity-70"
+            style={{ color: 'var(--text-muted)' }}
           >
             <X className="w-5 h-5" />
           </button>
@@ -168,9 +169,13 @@ Provide a concise, direct answer in under 150 words. Use bullet points for clari
                 {/* Avatar */}
                 <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
                   message.role === 'user' 
-                    ? 'bg-primary-600' 
-                    : 'bg-gradient-to-br from-purple-500 to-pink-500'
-                }`}>
+                    ? '' 
+                    : ''
+                }`} style={{
+                  background: message.role === 'user'
+                    ? 'var(--accent)'
+                    : 'linear-gradient(135deg, #9333ea, #ec4899)'
+                }}>
                   {message.role === 'user' ? (
                     <User className="w-4 h-4 text-white" />
                   ) : (
@@ -179,25 +184,20 @@ Provide a concise, direct answer in under 150 words. Use bullet points for clari
                 </div>
 
                 {/* Message Bubble */}
-                <div className={`rounded-lg p-3 ${
-                  message.role === 'user'
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-secondary-100 dark:bg-secondary-700 text-secondary-900 dark:text-white'
-                }`}>
+                <div className={`rounded-lg p-3`} style={{
+                  backgroundColor: message.role === 'user' ? 'var(--accent)' : 'var(--accent-soft)',
+                  color: message.role === 'user' ? 'white' : 'var(--text-strong)'
+                }}>
                   {message.role === 'user' ? (
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">
                       {message.content}
                     </p>
                   ) : (
-                    <div className="text-sm leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0">
+                    <div className="text-sm leading-relaxed prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2 prose-li:my-0">
                       <ReactMarkdown>{message.content}</ReactMarkdown>
                     </div>
                   )}
-                  <p className={`text-xs mt-1 ${
-                    message.role === 'user'
-                      ? 'text-primary-100'
-                      : 'text-secondary-500 dark:text-secondary-400'
-                  }`}>
+                  <p className={`text-xs mt-1 opacity-70`}>
                     {new Date(message.timestamp).toLocaleTimeString([], { 
                       hour: '2-digit', 
                       minute: '2-digit' 
@@ -212,14 +212,14 @@ Provide a concise, direct answer in under 150 words. Use bullet points for clari
           {isLoading && (
             <div className="flex justify-start">
               <div className="flex items-start space-x-2 max-w-[80%]">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)' }}>
                   <Bot className="w-4 h-4 text-white" />
                 </div>
-                <div className="rounded-lg p-3 bg-secondary-100 dark:bg-secondary-700">
+                <div className="rounded-lg p-3" style={{ backgroundColor: 'var(--accent-soft)' }}>
                   <div className="flex space-x-2">
-                    <div className="w-2 h-2 bg-secondary-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-secondary-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-secondary-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--accent)' }}></div>
+                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--accent)', animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--accent)', animationDelay: '0.2s' }}></div>
                   </div>
                 </div>
               </div>
@@ -230,7 +230,7 @@ Provide a concise, direct answer in under 150 words. Use bullet points for clari
         </div>
 
         {/* Input */}
-        <div className="p-4 border-t border-secondary-200 dark:border-secondary-700">
+        <div className="p-4 border-t" style={{ borderColor: 'rgba(0,0,0,0.1)' }}>
           <div className="flex space-x-2">
             <input
               ref={inputRef}
@@ -240,17 +240,18 @@ Provide a concise, direct answer in under 150 words. Use bullet points for clari
               onKeyPress={handleKeyPress}
               placeholder="Ask me anything..."
               disabled={isLoading}
-              className="flex-1 px-4 py-3 rounded-lg border border-secondary-300 dark:border-secondary-600 bg-white dark:bg-secondary-900 text-secondary-900 dark:text-white placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+              className="flex-1 px-4 py-3 rounded-lg border input disabled:opacity-50"
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className="px-6 py-3 bg-gradient-to-r from-primary-600 to-purple-600 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-primary-700 hover:to-purple-700 transition-all"
+              className="px-6 py-3 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-all"
+              style={{ background: 'linear-gradient(135deg, var(--accent), #9333ea)' }}
             >
               <Send className="w-5 h-5" />
             </button>
           </div>
-          <p className="text-xs text-secondary-500 dark:text-secondary-400 mt-2">
+          <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
             Press Enter to send, Shift+Enter for new line
           </p>
         </div>
@@ -260,25 +261,29 @@ Provide a concise, direct answer in under 150 words. Use bullet points for clari
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setInput("Can you explain this in simpler terms?")}
-              className="px-3 py-1 text-xs bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300 rounded-full hover:bg-secondary-200 dark:hover:bg-secondary-600 transition-colors"
+              className="px-3 py-1 text-xs rounded-full hover:opacity-70 transition-opacity"
+              style={{ backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
             >
               Explain simpler
             </button>
             <button
               onClick={() => setInput("What are the key concepts I should understand?")}
-              className="px-3 py-1 text-xs bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300 rounded-full hover:bg-secondary-200 dark:hover:bg-secondary-600 transition-colors"
+              className="px-3 py-1 text-xs rounded-full hover:opacity-70 transition-opacity"
+              style={{ backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
             >
               Key concepts
             </button>
             <button
               onClick={() => setInput("Can you give me a hint?")}
-              className="px-3 py-1 text-xs bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300 rounded-full hover:bg-secondary-200 dark:hover:bg-secondary-600 transition-colors"
+              className="px-3 py-1 text-xs rounded-full hover:opacity-70 transition-opacity"
+              style={{ backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
             >
               Give hint
             </button>
             <button
               onClick={() => setInput("Why is this the correct answer?")}
-              className="px-3 py-1 text-xs bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300 rounded-full hover:bg-secondary-200 dark:hover:bg-secondary-600 transition-colors"
+              className="px-3 py-1 text-xs rounded-full hover:opacity-70 transition-opacity"
+              style={{ backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}
             >
               Why correct?
             </button>
