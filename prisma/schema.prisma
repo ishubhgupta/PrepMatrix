@@ -1,0 +1,208 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  relationMode = "prisma" // Required for TiDB Cloud
+}
+
+// ==================== AUTHENTICATION ====================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String    // Hashed password
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  sessions      Session[]
+  attempts      QuestionAttempt[]
+  spacedReps    SpacedRepetition[]
+  errorNotebook ErrorNotebook[]
+  studyPlans    StudyPlan[]
+  studySessions StudySession[]
+  customSubjects CustomSubject[]
+  
+  @@index([email])
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  expires      DateTime
+  sessionToken String   @unique
+  accessToken  String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@map("sessions")
+}
+
+// ==================== QUESTIONS & PROGRESS ====================
+
+model Question {
+  id            String   @id // e.g., "genai-001" or "custom-abc123-001"
+  subject       String   // GenAI, CppOOP, DBMS, OS, PythonML, or custom subject ID
+  topic         String
+  difficulty    String   // Easy, Medium, Hard
+  questionText  String   @db.Text
+  optionsJson   String   @db.Text // JSON array of options
+  correctAnswer String   // A, B, C, or D
+  rationale     String   @db.Text
+  isCustom      Boolean  @default(false)
+  customSubjectId String?
+  createdBy     String?  // userId for custom questions
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  attempts      QuestionAttempt[]
+  spacedReps    SpacedRepetition[]
+  errorNotebook ErrorNotebook[]
+  customSubject CustomSubject? @relation(fields: [customSubjectId], references: [id], onDelete: Cascade)
+  
+  @@index([subject])
+  @@index([difficulty])
+  @@index([topic])
+  @@index([isCustom])
+  @@index([customSubjectId])
+  @@index([createdBy])
+  @@map("questions")
+}
+
+model QuestionAttempt {
+  id             String   @id @default(cuid())
+  userId         String
+  questionId     String
+  selectedAnswer String   // A, B, C, or D
+  isCorrect      Boolean
+  confidence     String?  // "very", "somewhat", "guessing"
+  timeSpent      Int?     // milliseconds
+  attemptedAt    DateTime @default(now())
+  
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([questionId])
+  @@index([attemptedAt])
+  @@map("question_attempts")
+}
+
+// ==================== SPACED REPETITION ====================
+
+model SpacedRepetition {
+  id                  String   @id @default(cuid())
+  userId              String
+  questionId          String
+  easeFactor          Float    @default(2.5) // SuperMemo SM-2 algorithm
+  interval            Int      @default(1)   // days until next review
+  repetitions         Int      @default(0)   // consecutive correct answers
+  nextReviewDate      DateTime
+  lastReviewedAt      DateTime @default(now())
+  consecutiveCorrect  Int      @default(0)
+  consecutiveWrong    Int      @default(0)
+  
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, questionId])
+  @@index([userId])
+  @@index([nextReviewDate])
+  @@index([questionId])
+  @@map("spaced_repetition")
+}
+
+// ==================== ERROR TRACKING ====================
+
+model ErrorNotebook {
+  id              String   @id @default(cuid())
+  userId          String
+  questionId      String
+  incorrectCount  Int      @default(1)
+  lastIncorrectAt DateTime @default(now())
+  isResolved      Boolean  @default(false)
+  resolvedAt      DateTime?
+  notes           String?  @db.Text
+  
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, questionId])
+  @@index([userId])
+  @@index([isResolved])
+  @@index([questionId])
+  @@map("error_notebook")
+}
+
+// ==================== STUDY PLANS ====================
+
+model StudyPlan {
+  id                    String   @id @default(cuid())
+  userId                String
+  name                  String
+  examDate              DateTime?
+  dailyTargetQuestions  Int      @default(20)
+  targetScore           Float?
+  subjects              String   @db.Text // JSON array
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([isActive])
+  @@map("study_plans")
+}
+
+model StudySession {
+  id                String   @id @default(cuid())
+  userId            String
+  startedAt         DateTime @default(now())
+  endedAt           DateTime?
+  questionsAnswered Int      @default(0)
+  correctAnswers    Int      @default(0)
+  totalTimeSpent    Int      @default(0) // milliseconds
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([startedAt])
+  @@map("study_sessions")
+}
+
+// ==================== CUSTOM QUIZZES ====================
+
+model CustomSubject {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String   // User-provided name
+  description   String   @db.Text // Original user prompt
+  status        String   @default("pending") // pending, generating, ready, failed, cancelled
+  questionCount Int      @default(0) // Current number of questions
+  targetCount   Int      // Target number (10, 30, or 50)
+  progress      Int      @default(0) // Progress percentage (0-100)
+  keywords      String?  @db.Text // JSON array of extracted keywords
+  errorMessage  String?  @db.Text // If failed
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questions Question[]
+  
+  @@index([userId])
+  @@index([status])
+  @@map("custom_subjects")
+}

@@ -1,18 +1,65 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuizStore } from '@/lib/store/quiz-store';
+import { useSession } from 'next-auth/react';
 import { subjects } from '@/data';
+
+
+interface UserStats {
+  totalAnswered: number;
+  totalCorrect: number;
+  overallAccuracy: number;
+  questionsToday: number;
+  currentStreak: number;
+  longestStreak: number;
+  subjectStats: Record<string, {
+    answered: number;
+    correct: number;
+    accuracy: number;
+    total: number;
+  }>;
+  dailyStats: Array<{
+    date: string;
+    questionsAnswered: number;
+    correctAnswers: number;
+    accuracy: number;
+  }>;
+}
 
 export function ContentCharts() {
   const [mounted, setMounted] = useState(false);
-  const { subjectProgress, dailyStats } = useQuizStore();
+  const [stats, setStats] = useState<UserStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
+  useEffect(() => {
+    if (!session?.user) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/user-stats');
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data.stats);
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [session]);
+
+  if (!mounted || loading) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card p-6 animate-pulse">
@@ -25,27 +72,27 @@ export function ContentCharts() {
     );
   }
 
-  // Get real subject data
+  // Get real subject data from API stats
   const subjectData = subjects.map(subject => {
-    const progress = subjectProgress[subject.id];
-    const accuracy = progress?.accuracy ? Math.round(progress.accuracy * 100) : 0;
+    const progress = stats?.subjectStats?.[subject.id];
+    const accuracy = progress?.accuracy ? Math.round(progress.accuracy) : 0;
     return {
       subject: subject.name,
       score: accuracy,
-      answered: progress?.answeredQuestions || 0,
-      total: subject.totalQuestions,
+      answered: progress?.answered || 0,
+      total: progress?.total || subject.totalQuestions,
       color: subject.color,
     };
   }).filter(s => s.answered > 0); // Only show subjects with progress
 
-  // Get recent activity from daily stats
-  const recentActivity = dailyStats
+  // Get recent activity from API stats
+  const recentActivity = (stats?.dailyStats || [])
     .slice(-7)
     .reverse()
     .map(stat => ({
       date: new Date(stat.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       questionsAnswered: stat.questionsAnswered,
-      accuracy: stat.questionsAnswered > 0 ? Math.round((stat.correctAnswers / stat.questionsAnswered) * 100) : 0,
+      accuracy: Math.round(stat.accuracy),
     }));
 
   const hasData = subjectData.length > 0;

@@ -74,7 +74,7 @@ export function QuizStats({ totalQuestions, subject }: QuizStatsProps) {
 
   return (
     <div className="card p-6 mb-8">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {/* Total Questions */}
         <div>
           <div className="flex items-center gap-2 mb-2">
@@ -111,20 +111,6 @@ export function QuizStats({ totalQuestions, subject }: QuizStatsProps) {
           <p className="text-3xl font-bold" style={{ color: 'var(--text-strong)' }}>{accuracy}%</p>
           <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
             {correctAnswers}/{answeredQuestions} correct
-          </p>
-        </div>
-
-        {/* Average Time */}
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4" style={{ color: 'var(--accent)' }} />
-            <span className="text-xs font-medium tracking-wide uppercase" style={{ color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
-              Avg Time
-            </span>
-          </div>
-          <p className="text-3xl font-bold" style={{ color: 'var(--text-strong)' }}>{avgTimePerQuestion}s</p>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-            per question
           </p>
         </div>
       </div>

@@ -1,6 +1,8 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
+import SessionProvider from '@/components/SessionProvider';
+import { ToastContainer } from '@/components/ui/ToastContainer';
 import type { Metadata, Viewport } from 'next';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -30,9 +32,12 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" />
       </head>
       <body className={inter.className}>
-        <Providers>
-          {children}
-        </Providers>
+        <SessionProvider>
+          <Providers>
+            {children}
+            <ToastContainer />
+          </Providers>
+        </SessionProvider>
       </body>
     </html>
   );

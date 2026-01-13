@@ -1,33 +1,72 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuizStore } from '@/lib/store/quiz-store';
+import { useSession } from 'next-auth/react';
 import { subjects } from '@/data';
+
+interface UserStats {
+  totalAnswered: number;
+  totalCorrect: number;
+  overallAccuracy: number;
+  questionsToday: number;
+  currentStreak: number;
+  longestStreak: number;
+  subjectStats: Record<string, {
+    answered: number;
+    correct: number;
+    accuracy: number;
+    total: number;
+  }>;
+  dailyStats: Array<{
+    date: string;
+    questionsAnswered: number;
+    correctAnswers: number;
+    accuracy: number;
+  }>;
+}
 
 export function StatsOverview() {
   const [mounted, setMounted] = useState(false);
-  const [today, setToday] = useState('');
-  const { subjectProgress, dailyStats } = useQuizStore();
+  const [stats, setStats] = useState<UserStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
 
   useEffect(() => {
     setMounted(true);
-    setToday(new Date().toISOString().split('T')[0]);
   }, []);
+
+  useEffect(() => {
+    if (!session?.user) {
+      setLoading(false);
+      return;
+    }
+
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/user-stats');
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data.stats);
+        }
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [session]);
 
   // Calculate overall stats
   const totalQuestions = subjects.reduce((sum, subject) => sum + subject.totalQuestions, 0);
-  const totalAnswered = Object.values(subjectProgress).reduce((sum, progress) => sum + progress.answeredQuestions, 0);
-  const totalCorrect = Object.values(subjectProgress).reduce((sum, progress) => sum + progress.correctAnswers, 0);
-  const overallAccuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+  const totalAnswered = stats?.totalAnswered || 0;
+  const totalCorrect = stats?.totalCorrect || 0;
+  const overallAccuracy = stats?.overallAccuracy || 0;
+  const questionsToday = stats?.questionsToday || 0;
+  const longestStreak = stats?.longestStreak || 0;
 
-  // Get today's stats
-  const todayStats = today ? dailyStats.find(stat => stat.date === today) : null;
-  const questionsToday = todayStats?.questionsAnswered || 0;
-
-  // Calculate longest streak
-  const longestStreak = Math.max(...Object.values(subjectProgress).map(progress => progress.streak), 0);
-
-  if (!mounted) {
+  if (!mounted || loading) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
         {[...Array(5)].map((_, i) => (
@@ -41,7 +80,7 @@ export function StatsOverview() {
     );
   }
 
-  const stats = [
+  const statsData = [
     {
       label: 'Question Library',
       value: totalQuestions.toLocaleString(),
@@ -71,7 +110,7 @@ export function StatsOverview() {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
-      {stats.map((stat, index) => (
+      {statsData.map((stat, index) => (
         <div key={index} className="card p-4 text-center">
           <div className="text-2xl font-semibold mb-1" style={{ color: 'var(--accent)' }}>
             {stat.value}

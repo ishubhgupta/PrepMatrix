@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSession } from 'next-auth/react';
 import { Question } from '@/types';
 import { useQuizStore } from '@/lib/store/quiz-store';
 import { useChatStore } from '@/lib/store/chat-store';
@@ -31,6 +32,7 @@ export function QuestionCard({
   totalQuestions,
   onAnswerCorrect
 }: QuestionCardProps) {
+  const { data: session } = useSession();
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -38,6 +40,15 @@ export function QuestionCard({
   const [isGeneratingSimilar, setIsGeneratingSimilar] = useState(false);
   const [isExplaining, setIsExplaining] = useState(false);
   const [explanationLevel, setExplanationLevel] = useState<'simple' | 'detailed' | 'advanced'>('simple');
+  const [confidence, setConfidence] = useState<'very' | 'somewhat' | 'guessing'>('somewhat');
+  const [startTime] = useState(Date.now());
+  
+  // Hint system
+  const [hintsUsed, setHintsUsed] = useState<number[]>([]);
+  const [eliminatedOptions, setEliminatedOptions] = useState<number[]>([]);
+  const [conceptualHint, setConceptualHint] = useState<string>('');
+  const [explanationSnippet, setExplanationSnippet] = useState<string>('');
+  const [scoreMultiplier, setScoreMultiplier] = useState(1);
   
   const cardRef = useRef<HTMLDivElement>(null);
   const nextQuestionRef = useRef<HTMLDivElement>(null);
@@ -93,14 +104,34 @@ export function QuestionCard({
     setSelectedOption(optionIndex);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (selectedOption === null || showAnswer) return;
     
     const isCorrect = selectedOption === correctAnswerIndex;
+    const timeSpent = Date.now() - startTime;
     
     setShowAnswer(true);
     setShowFeedback(true);
-    answerQuestion(question.id, selectedOption, 0);
+    answerQuestion(question.id, selectedOption, timeSpent);
+    
+    // Save to database if user is authenticated
+    if (session?.user) {
+      try {
+        await fetch('/api/questions/attempt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            questionId: question.id,
+            selectedAnswer: ['A', 'B', 'C', 'D'][selectedOption],
+            isCorrect,
+            confidence,
+            timeSpent,
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to save progress:', error);
+      }
+    }
     
     // If correct, smooth scroll to next question after a delay
     if (isCorrect) {
@@ -118,7 +149,55 @@ export function QuestionCard({
     }
   };
 
+  const getOptionIcon = (optionIndex: number) => {
+    if (!showAnswer) return null;
+    
+    if (optionIndex === correctAnswerIndex) {
+      return <CheckCircle2 className="w-5 h-5 text-green-600" strokeWidth={2.5} />;
+    }
+    
+    if (optionIndex === selectedOption && optionIndex !== correctAnswerIndex) {
+      return <XCircle className="w-5 h-5 text-red-600" strokeWidth={2.5} />;
+    }
+    
+    return null;
+  };
+
+  // Hint System Functions
+  const handleUseHint = (tier: number) => {
+    if (hintsUsed.includes(tier) || showAnswer) return;
+    
+    setHintsUsed([...hintsUsed, tier]);
+    setScoreMultiplier(prev => Math.max(prev - 0.1, 0.7)); // -10% per hint, min 70%
+
+    if (tier === 1) {
+      // Eliminate 2 wrong options
+      const wrongIndices = question.options
+        .map((opt, idx) => idx)
+        .filter(idx => idx !== correctAnswerIndex);
+      const toEliminate = wrongIndices.sort(() => Math.random() - 0.5).slice(0, 2);
+      setEliminatedOptions(toEliminate);
+    } else if (tier === 2) {
+      // Generate conceptual hint
+      const hints = [
+        `Think about the core concept of ${question.topic}`,
+        `Consider how this relates to ${question.subject} fundamentals`,
+        `Focus on the key difference between the options`,
+        `Remember the definition and common use cases`,
+      ];
+      setConceptualHint(hints[Math.floor(Math.random() * hints.length)]);
+    } else if (tier === 3) {
+      // Show explanation snippet (first 100 characters)
+      setExplanationSnippet(question.rationale.substring(0, 100) + '...');
+    }
+  };
+
   const getOptionStyle = (optionIndex: number) => {
+    // Eliminated options
+    if (eliminatedOptions.includes(optionIndex) && !showAnswer) {
+      return 'border-black/5 opacity-30 cursor-not-allowed bg-black/5';
+    }
+    
     if (!showAnswer) {
       if (selectedOption === optionIndex) {
         return 'border-[color:var(--accent)] bg-[color:var(--accent-soft)] scale-[1.01] shadow-md';
@@ -135,20 +214,6 @@ export function QuestionCard({
     }
     
     return 'border-black/5 opacity-40';
-  };
-
-  const getOptionIcon = (optionIndex: number) => {
-    if (!showAnswer) return null;
-    
-    if (optionIndex === correctAnswerIndex) {
-      return <CheckCircle2 className="w-5 h-5 text-green-600" strokeWidth={2.5} />;
-    }
-    
-    if (optionIndex === selectedOption && optionIndex !== correctAnswerIndex) {
-      return <XCircle className="w-5 h-5 text-red-600" strokeWidth={2.5} />;
-    }
-    
-    return null;
   };
 
   const generateSimilarQuestion = async () => {
@@ -340,12 +405,15 @@ export function QuestionCard({
         {/* Options */}
         <div className="space-y-3 mb-6">
           {question.options.map((option, index) => {
+            // Hide eliminated options
+            if (eliminatedOptions.includes(index) && !showAnswer) return null;
+            
             const letter = String.fromCharCode(65 + index);
             return (
               <button
                 key={index}
                 onClick={() => handleAnswerSelect(index)}
-                disabled={showAnswer}
+                disabled={showAnswer || eliminatedOptions.includes(index)}
                 className={`w-full text-left p-4 md:p-5 rounded-2xl border-2 transition-all duration-200 ${
                   getOptionStyle(index)
                 }`}
@@ -371,15 +439,129 @@ export function QuestionCard({
           })}
         </div>
 
+        {/* Hint System */}
+        {!showAnswer && (
+          <div className="mb-6 space-y-3">
+            {/* Hint Buttons */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => handleUseHint(1)}
+                disabled={hintsUsed.includes(1)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  hintsUsed.includes(1)
+                    ? 'bg-black/5 text-black/30 cursor-not-allowed'
+                    : 'bg-white border-2 border-black/10 hover:border-[color:var(--accent)] hover:bg-[color:var(--accent-soft)] text-[color:var(--text-strong)]'
+                }`}
+              >
+                🎯 Eliminate 2 Options (-10%)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUseHint(2)}
+                disabled={hintsUsed.includes(2)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  hintsUsed.includes(2)
+                    ? 'bg-black/5 text-black/30 cursor-not-allowed'
+                    : 'bg-white border-2 border-black/10 hover:border-[color:var(--accent)] hover:bg-[color:var(--accent-soft)] text-[color:var(--text-strong)]'
+                }`}
+              >
+                💡 Get Hint (-10%)
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUseHint(3)}
+                disabled={hintsUsed.includes(3)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  hintsUsed.includes(3)
+                    ? 'bg-black/5 text-black/30 cursor-not-allowed'
+                    : 'bg-white border-2 border-black/10 hover:border-[color:var(--accent)] hover:bg-[color:var(--accent-soft)] text-[color:var(--text-strong)]'
+                }`}
+              >
+                📖 Show Explanation (-10%)
+              </button>
+            </div>
+
+            {/* Active Hints Display */}
+            {conceptualHint && (
+              <div className="p-4 rounded-lg border-2 border-[color:var(--accent)] bg-[color:var(--accent-soft)]">
+                <div className="flex items-start gap-2">
+                  <span className="text-lg">💡</span>
+                  <div>
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-strong)' }}>Hint:</p>
+                    <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{conceptualHint}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            {explanationSnippet && (
+              <div className="p-4 rounded-lg border-2 border-[color:var(--accent)] bg-[color:var(--accent-soft)]">
+                <div className="flex items-start gap-2">
+                  <span className="text-lg">📖</span>
+                  <div>
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-strong)' }}>Partial Explanation:</p>
+                    <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{explanationSnippet}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Submit Button */}
         {!showAnswer && (
-          <button
-            onClick={handleSubmit}
-            disabled={selectedOption === null}
-            className="btn btn-primary w-full py-4 text-base font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-          >
-            {selectedOption !== null ? 'Submit Answer' : 'Select an answer to continue'}
-          </button>
+          <div className="space-y-4">
+            {session?.user && selectedOption !== null && (
+              <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--accent-soft)' }}>
+                <label className="block text-sm font-medium mb-3" style={{ color: 'var(--text-strong)' }}>
+                  How confident are you?
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfidence('very')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      confidence === 'very'
+                        ? 'bg-[color:var(--accent)] text-white shadow-md scale-[1.02]'
+                        : 'bg-white text-[color:var(--text-muted)] hover:bg-[color:var(--accent-soft)]'
+                    }`}
+                  >
+                    Very Sure
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfidence('somewhat')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      confidence === 'somewhat'
+                        ? 'bg-[color:var(--accent)] text-white shadow-md scale-[1.02]'
+                        : 'bg-white text-[color:var(--text-muted)] hover:bg-[color:var(--accent-soft)]'
+                    }`}
+                  >
+                    Somewhat
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfidence('guessing')}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      confidence === 'guessing'
+                        ? 'bg-[color:var(--accent)] text-white shadow-md scale-[1.02]'
+                        : 'bg-white text-[color:var(--text-muted)] hover:bg-[color:var(--accent-soft)]'
+                    }`}
+                  >
+                    Guessing
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            <button
+              onClick={handleSubmit}
+              disabled={selectedOption === null}
+              className="btn btn-primary w-full py-4 text-base font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            >
+              {selectedOption !== null ? 'Submit Answer' : 'Select an answer to continue'}
+            </button>
+          </div>
         )}
 
         {/* Explanation */}
