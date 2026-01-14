@@ -1,15 +1,44 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { SubjectCard } from '@/components/dashboard/SubjectCard';
-import { StatsOverview } from '@/components/dashboard/StatsOverview';
-import { ContentCharts } from '@/components/dashboard/ContentCharts';
-import { AIFeaturesSection } from '@/components/dashboard/AIFeaturesSection';
 import { subjects, getQuestionStats } from '@/data';
 import { Target, Brain, TrendingUp } from 'lucide-react';
 
 export default function HomePage() {
   const stats = getQuestionStats();
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
+  // Redirect logged-in users to dashboard
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/dashboard');
+    }
+  }, [status, router]);
+
+  // Show loading while checking auth or redirecting
+  if (status === 'loading' || status === 'authenticated') {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-pulse">
+              <div className="w-16 h-16 rounded-full mx-auto mb-4" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
+              <p style={{ color: 'var(--text-muted)' }}>Loading...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Logged-out users - Marketing/Landing Page
   return (
     <div className="min-h-screen">
       <Header />
@@ -36,10 +65,10 @@ export default function HomePage() {
             </Link>
             
             <Link 
-              href="/progress/" 
+              href="/auth/signup" 
               className="btn btn-secondary px-8 py-4 text-base"
             >
-              Track Progress
+              Sign Up Free
             </Link>
           </div>
 
@@ -83,12 +112,20 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <StatsOverview />
-
-        {/* Content Charts */}
+        {/* Sign-in prompt for Learning Insights */}
         <div className="mb-16">
-          <ContentCharts />
+          <div className="card p-8 text-center">
+            <Brain className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--accent)' }} />
+            <h2 className="text-2xl font-bold mb-3" style={{ color: 'var(--text-strong)' }}>
+              AI-Powered Learning Insights
+            </h2>
+            <p className="text-lg mb-6 max-w-2xl mx-auto" style={{ color: 'var(--text-muted)' }}>
+              Sign in to unlock personalized insights, mistake pattern analysis, and AI-generated study recommendations
+            </p>
+            <Link href="/auth/signup" className="btn btn-primary">
+              Get Started Free
+            </Link>
+          </div>
         </div>
 
         {/* Subject Cards */}
@@ -108,9 +145,6 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-
-        {/* AI Features - Scroll animated section */}
-        <AIFeaturesSection />
       </main>
     </div>
   );

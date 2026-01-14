@@ -23,6 +23,7 @@ interface UserStats {
     questionsAnswered: number;
     correctAnswers: number;
     accuracy: number;
+    mockInterviews?: number;
   }>;
 }
 
@@ -86,12 +87,13 @@ export function ContentCharts() {
   }).filter(s => s.answered > 0); // Only show subjects with progress
 
   // Get recent activity from API stats - convert to calendar format
-  const activityMap = new Map<string, { questionsAnswered: number; accuracy: number }>();
+  const activityMap = new Map<string, { questionsAnswered: number; accuracy: number; mockInterviews: number }>();
   (stats?.dailyStats || []).forEach(stat => {
     const dateKey = new Date(stat.date).toISOString().split('T')[0];
     activityMap.set(dateKey, {
       questionsAnswered: stat.questionsAnswered,
       accuracy: Math.round(stat.accuracy),
+      mockInterviews: stat.mockInterviews || 0,
     });
   });
 
@@ -189,7 +191,7 @@ export function ContentCharts() {
           <div className="grid grid-cols-7 gap-2">
             {calendarDays.map((dayInfo, index) => {
               const activity = dayInfo.dateString ? activityMap.get(dayInfo.dateString) : null;
-              const hasActivity = !!activity && activity.questionsAnswered > 0;
+              const hasActivity = !!activity && (activity.questionsAnswered > 0 || activity.mockInterviews > 0);
               
               return (
                 <div
@@ -224,12 +226,21 @@ export function ContentCharts() {
                           <div className="text-xs font-semibold mb-1" style={{ color: 'var(--text-strong)' }}>
                             {new Date(dayInfo.dateString!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </div>
-                          <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                            {activity.questionsAnswered} questions
-                          </div>
-                          <div className="text-xs font-medium" style={{ color: '#2f9e44' }}>
-                            {activity.accuracy}% accuracy
-                          </div>
+                          {activity.questionsAnswered > 0 && (
+                            <>
+                              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                                {activity.questionsAnswered} questions
+                              </div>
+                              <div className="text-xs font-medium" style={{ color: '#2f9e44' }}>
+                                {activity.accuracy}% accuracy
+                              </div>
+                            </>
+                          )}
+                          {activity.mockInterviews > 0 && (
+                            <div className="text-xs font-medium" style={{ color: 'var(--accent)' }}>
+                              {activity.mockInterviews} mock interview{activity.mockInterviews > 1 ? 's' : ''}
+                            </div>
+                          )}
                           {/* Tooltip arrow */}
                           <div 
                             className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0"

@@ -89,12 +89,21 @@ export async function GET(request: NextRequest) {
 
     const questionsToday = todayAttempts.length;
 
-    // Get last 7 days activity
+    // Get mock interviews for calendar
+    const mockInterviews = await prisma.mockInterview.findMany({
+      where: {
+        userId: user.id,
+        status: 'completed'
+      },
+    });
+
+    // Get last 7 days activity (including mock interviews)
     const dailyStats: Array<{
       date: string;
       questionsAnswered: number;
       correctAnswers: number;
       accuracy: number;
+      mockInterviews: number;
     }> = [];
 
     for (let i = 6; i >= 0; i--) {
@@ -108,6 +117,13 @@ export async function GET(request: NextRequest) {
         return attemptDate.getTime() === date.getTime();
       });
 
+      const dayInterviews = mockInterviews.filter(interview => {
+        const completedDate = interview.completedAt ? new Date(interview.completedAt) : null;
+        if (!completedDate) return false;
+        completedDate.setHours(0, 0, 0, 0);
+        return completedDate.getTime() === date.getTime();
+      });
+
       const questionsAnswered = dayAttempts.length;
       const correctAnswers = dayAttempts.filter(a => a.isCorrect).length;
       
@@ -116,6 +132,7 @@ export async function GET(request: NextRequest) {
         questionsAnswered,
         correctAnswers,
         accuracy: questionsAnswered > 0 ? (correctAnswers / questionsAnswered) * 100 : 0,
+        mockInterviews: dayInterviews.length,
       });
     }
 
