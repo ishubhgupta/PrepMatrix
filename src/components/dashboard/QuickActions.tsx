@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { Play, Brain, AlertTriangle, RotateCcw, Sparkles, BookOpen, Target } from 'lucide-react';
+import { Play, Brain, AlertTriangle, RotateCcw, Sparkles, BookOpen, Target, Mic } from 'lucide-react';
 
 export function QuickActions() {
   const { data: session } = useSession();
@@ -19,6 +19,14 @@ export function QuickActions() {
       href: '/quiz/DBMS',
       color: 'var(--accent)',
       bgColor: 'var(--accent-soft)',
+    },
+    {
+      title: 'Mock Interview',
+      description: 'AI voice interview practice',
+      icon: Mic,
+      href: '/mock-interview',
+      color: '#ec4899',
+      bgColor: '#fdf2f8',
     },
     {
       title: 'Review Errors',

@@ -1,293 +1,372 @@
-# 🚀 PrepMatrix - AI-Powered Learning Platform
+# PrepMatrix - AI-Powered Learning Platform
 
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)](https://reactjs.org/)
+**PrepMatrix** is a comprehensive learning platform designed to help students master technical subjects through interactive quizzes, AI-powered mock interviews, intelligent study coaching, and advanced analytics. Built with Next.js 14, TypeScript, and powered by Google's Gemini AI.
 
-**PrepMatrix** is a modern, AI-powered learning platform designed to help students master technical subjects through interactive quizzes, intelligent explanations, and comprehensive progress tracking. Built with cutting-edge web technologies and featuring a beautiful glassmorphism UI design.
+## Features Overview
 
-![PrepMatrix Dashboard](https://via.placeholder.com/800x400/6366F1/FFFFFF?text=PrepMatrix+Dashboard)
+### **Quiz System**
+Practice with curated question banks across multiple technical subjects with instant feedback and detailed explanations.
 
-## ✨ Features
+### **AI Mock Interviews**
+Voice-based interview practice with AI evaluation, real-time conversation, and comprehensive performance feedback.
 
-### 🎯 **Core Learning Features**
-- **Interactive Quiz System** - Comprehensive question banks covering multiple subjects
-- **AI-Powered Explanations** - Get personalized explanations at different complexity levels
-- **Smart Progress Tracking** - Detailed analytics and performance insights
-- **Subject Coverage** - DBMS, GenAI, OOP, Operating Systems, Python ML
+### **AI Study Coach**
+Personalized study plans, interactive chat assistance, and adaptive learning recommendations.
 
-### 🤖 **AI Integration**
-- **Gemini AI Integration** - Powered by Google's Gemini API
-- **Similar Question Generation** - AI creates related practice questions
-- **Adaptive Explanations** - Simple, detailed, or advanced explanations based on user preference
-- **Interactive AI Chat** - Discussion features for deeper understanding (coming soon)
+### **Performance Analytics**
+Activity calendar, subject breakdown, progress tracking, and detailed performance insights.
 
-### 🎨 **Modern UI/UX**
-- **Glassmorphism Design** - Beautiful, modern interface with glass-like effects
-- **Dark/Light Theme** - Seamless theme switching with system preference detection
-- **Responsive Design** - Optimized for desktop, tablet, and mobile devices
-- **Smooth Animations** - Micro-interactions and transitions for enhanced user experience
-- **Gradient Backgrounds** - Dynamic, animated backgrounds with floating particles
+### **Custom AI Quiz Generation**
+Generate personalized quizzes on any topic with adjustable difficulty and question count.
 
-### 📊 **Analytics & Progress**
-- **Performance Dashboard** - Visual charts and statistics
-- **Subject Breakdown** - Individual progress tracking per subject
-- **Recent Activity** - Timeline of learning activities
-- **Achievement System** - Milestone tracking and badges
-- **Time Tracking** - Monitor time spent on questions and topics
+### **Error Notebook**
+Track mistakes, review incorrect answers, and learn from your errors with AI explanations.
 
-## 🛠️ Technology Stack
+---
+
+## Feature Guide
+
+### 1. **Interactive Quiz System**
+
+**How it Works:**
+- Access 5 subjects: DBMS, Operating Systems, Python & ML, GenAI & LLMs, and C++ & OOP
+- Each subject contains hundreds of curated questions
+- Questions are organized by topics and difficulty levels
+- Real-time answer validation with immediate feedback
+
+**How to Use:**
+1. Navigate to any subject from the header menu or dashboard
+2. Select filters (difficulty, topics, reset progress if needed)
+3. Answer questions by selecting options and clicking "Submit Answer"
+4. View instant feedback with explanations
+5. Track your progress in real-time with the progress bar
+6. Use confidence indicators to mark question difficulty for spaced repetition
+
+**Key Features:**
+- **Topic-based filtering** - Focus on specific areas you want to improve
+- **Difficulty levels** - Easy, Medium, and Hard questions
+- **Real-time progress** - See your accuracy and completion status
+- **Detailed rationales** - Learn why answers are correct or incorrect
+- **Subject reset** - Start fresh on any subject anytime
+
+---
+
+### 2. **AI Mock Interviews**
+
+**How it Works:**
+- Voice-based interview simulation using browser Web Speech API
+- AI generates unique questions based on subject, difficulty, and target role
+- Each interview consists of 5 questions from 8 different topics (ensures diversity)
+- Real-time conversation - AI asks questions, you respond verbally
+- Comprehensive evaluation on technical accuracy, communication, depth, and confidence
+- Topic-based question generation prevents repetition
+
+**How to Use:**
+1. Click "Mock Interview" in the header or use the "New Interview" button
+2. Select your **Subject** (DBMS, OS, Python & ML, GenAI, C++ & OOP)
+3. Choose **Difficulty** (Beginner, Intermediate, Advanced)
+4. Select **Target Role** (Software Engineer, Data Engineer, ML Engineer, etc.)
+5. Click "Start Interview" to begin
+6. **During Interview:**
+   - AI asks a question via text-to-speech
+   - Click microphone icon to record your answer
+   - Speak clearly and naturally
+   - Click "Stop" when done, then "Submit Answer"
+   - AI evaluates and moves to next question
+7. **After Completion:**
+   - View overall score and category breakdowns
+   - Read detailed feedback with strengths and improvements
+   - Review individual question performance
+   - Access all previous interviews from the main page
+
+**Technical Details:**
+- Uses Google Gemini AI for question generation and evaluation
+- 8 distinct topics per subject ensure no question repetition
+- Each question focuses on a specific topic area
+- AI evaluates: Technical Accuracy, Communication Clarity, Answer Depth, Confidence
+- Results include overall feedback, question-by-question analysis, and improvement recommendations
+- All interviews saved with scores, timestamps, and complete responses
+
+**Requirements:**
+- Chrome or Edge browser (best Web Speech API support)
+- Working microphone
+- Quiet environment
+- Active internet connection
+
+---
+
+### 3. **AI Study Coach**
+
+**How it Works:**
+- Personalized AI chatbot tailored to your learning needs
+- Analyzes your performance data to provide targeted recommendations
+- Generates custom study plans based on your weak areas
+- Interactive chat interface for asking questions and clarification
+
+**How to Use:**
+1. Navigate to "Study Coach" from the header menu
+2. **Quick Actions:**
+   - "Explain a concept" - Ask about any technical topic
+   - "Create study plan" - Get a personalized learning roadmap
+   - "Review weak topics" - Focus on areas needing improvement
+3. **Chat Interface:**
+   - Type questions naturally
+   - Get detailed explanations with examples
+   - Ask follow-up questions for deeper understanding
+4. **Custom Study Plans:**
+   - Click "Create Custom Plan"
+   - Select subject and duration (1, 2, or 4 weeks)
+   - AI generates structured daily/weekly learning schedule
+   - Focus on your specific weak areas
+
+**Features:**
+- Context-aware responses based on your quiz history
+- Adaptive difficulty in explanations
+- Real-world examples and analogies
+- Study scheduling recommendations
+- Progress-based plan adjustments
+
+---
+
+### 4. **Performance Analytics**
+
+**How it Works:**
+- Comprehensive dashboard showing all learning activity
+- Calendar heatmap displays daily quiz and interview activity
+- Subject breakdown shows progress per topic
+- Recent activity feed combines quizzes and mock interviews
+- Visual charts for easy progress tracking
+
+**Dashboard Components:**
+
+**Stats Overview:**
+- Total questions answered
+- Overall accuracy percentage
+- Questions completed today
+- Current learning streak
+
+**Activity Calendar:**
+- Monthly view with color-coded activity days
+- Hover tooltips show details:
+  - Number of quiz questions answered
+  - Quiz accuracy percentage
+  - Number of mock interviews completed
+- Tracks both quiz practice and mock interviews
+
+**Subject Breakdown:**
+- Progress bar for each subject
+- Percentage completion and accuracy
+- Total questions available vs. answered
+
+**Recent Activity:**
+- Timeline of last 10 activities (quizzes + interviews)
+- Quiz attempts show: question, subject, correct/incorrect, timestamp
+- Mock interviews show: subject, role, overall score, clickable to results
+- Color-coded for easy scanning
+
+---
+
+### 5. **Custom AI Quiz Generation**
+
+**How it Works:**
+- AI generates fresh questions on any technical topic
+- Powered by Google Gemini for intelligent question creation
+- Questions saved for future practice
+- Multiple attempts allowed per quiz
+
+**How to Use:**
+1. Navigate to "AI Quiz" from the header menu
+2. Click "Generate New Quiz"
+3. Enter parameters:
+   - **Topic** - Any technical subject (e.g., "React Hooks", "SQL Joins")
+   - **Difficulty** - Easy, Medium, or Hard
+   - **Question Count** - 3, 5, or 10 questions
+4. Click "Generate Quiz" and wait for AI processing
+5. Take the quiz with generated questions
+6. View all your custom quizzes in the main page
+7. Retake quizzes anytime for practice
+
+**Features:**
+- Unlimited topic flexibility
+- AI-generated multiple choice questions
+- Complete explanations for each answer
+- Save and replay functionality
+- Progress tracking per custom quiz
+
+---
+
+### 6. **Error Notebook**
+
+**How it Works:**
+- Automatically tracks all incorrectly answered questions
+- Organized by subject for focused review
+- AI-powered explanations help understand mistakes
+- Re-attempt questions to verify learning
+
+**How to Use:**
+1. Questions you answer incorrectly are automatically saved
+2. Navigate to "Error Notebook" to review
+3. Browse by subject tabs
+4. For each error:
+   - See the original question
+   - View your incorrect answer
+   - Read the correct answer
+   - Get AI explanation of why you were wrong
+5. Click "Mark as Learned" when you understand the concept
+6. Filter between active errors and learned items
+
+**Features:**
+- Subject-wise organization
+- Detailed mistake analysis
+- AI-generated learning explanations
+- Progress tracking (errors vs. learned)
+- Easy review and practice workflow
+
+---
+
+### 7. **Settings & Configuration**
+
+**Available Settings:**
+- **Theme Toggle** - Switch between light and dark modes
+- **Gemini API Key** - Configure AI features
+- **Profile Management** - Update user information
+- **Data Management** - Export or reset progress
+
+**API Key Setup:**
+1. Get free API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Go to Settings page
+3. Enter API key in the designated field
+4. Click "Validate & Enable"
+5. AI features (Study Coach, Custom Quiz, Mock Interview) will activate
+
+---
+
+## Technology Stack
 
 ### **Frontend**
 - **Next.js 14** - React framework with App Router
 - **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first CSS framework
-- **Lucide React** - Modern icon library
-- **Zustand** - Lightweight state management
+- **Tailwind CSS** - Utility-first styling
+- **NextAuth.js** - Authentication
+- **Zustand** - State management
 
-### **AI & APIs**
-- **Google Gemini AI** - Advanced language model integration
-- **Custom API Routes** - Next.js API routes for backend functionality
-- **Cookie-based Storage** - Secure API key management
+### **Backend**
+- **Prisma ORM** - Database management
+- **MySQL (TiDB Cloud)** - Database hosting
+- **Next.js API Routes** - Backend endpoints
 
-### **Development Tools**
-- **ESLint** - Code linting and quality
-- **PostCSS** - CSS processing and optimization
-- **Custom Animations** - CSS keyframes and transitions
+### **AI Integration**
+- **Google Gemini AI** - Question generation, evaluation, tutoring
+- **Web Speech API** - Voice recognition and text-to-speech
 
-## 🚀 Getting Started
+### **Development**
+- **ESLint** - Code quality
+- **PostCSS** - CSS processing
+- **Vitest** - Unit testing
+- **Playwright** - E2E testing
+
+---
+
+## Local Development Setup
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or pnpm package manager
-- Google Gemini API key (required for AI features)
+- Node.js 18+
+- MySQL database
+- Google Gemini API key
+
+### Environment Variables
+
+Create `.env` file:
+```env
+# Database
+DATABASE_URL="mysql://username:password@host:port/database"
+
+# NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret-key-here"
+
+# Google Gemini AI
+GEMINI_API_KEY="your-gemini-api-key"
+```
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/prepmatrix.git
-   cd prepmatrix
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pnpm install
-   # or
-   npm install
-   ```
-
-3. **Set up environment variables**
-   
-   Create a `.env.local` file in the root directory:
-   ```bash
-   cp .env.example .env.local
-   ```
-   
-   Then add your Gemini API key:
-   ```env
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
-   
-   Get your free API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-
-4. **Run the development server**
-   ```bash
-   pnpm dev
-   # or
-   npm run dev
-   ```
-
-5. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
-
-### Build for Production
-
 ```bash
-pnpm build
-pnpm start
-# or
-npm run build
-npm start
+# Install dependencies
+npm install
+
+# Setup database
+npm run db:push
+
+# Seed questions
+npm run seed
+
+# Run development server
+npm run dev
 ```
 
-## 🎮 Usage Guide
+Open [http://localhost:3000](http://localhost:3000)
 
-### **Getting Started**
-1. **Dashboard** - Overview of your learning progress and quick access to subjects
-2. **Choose Subject** - Select from DBMS, GenAI, OOP, OS, or Python ML
-3. **Take Quiz** - Answer interactive questions with real-time feedback
-4. **AI Features** - Use AI explanations and similar question generation (requires API key)
-5. **Track Progress** - Monitor your performance and learning analytics
-
-### **AI Features Setup**
-AI features are automatically enabled when you have the API key configured in your `.env.local` file. The features include:
-- **Smart Explanations** - Get personalized explanations at different complexity levels
-- **Similar Question Generation** - AI creates related practice questions based on your current question
-
-To set up:
-1. Get your free API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Add it to your `.env.local` file as `GEMINI_API_KEY`
-3. Restart your development server
-4. AI features will be automatically available in the quiz interface
-
-### **Key Interactions**
-- **Answer Questions** - Click options and submit for immediate feedback
-- **View Explanations** - Get detailed rationales for correct answers
-- **Generate Similar Questions** - AI creates practice questions on similar topics
-- **Track Time** - Monitor your solving speed and improvement
-- **Switch Themes** - Toggle between light and dark modes
+---
 
 ## Data Model
 
 ### Question Schema
-```typescript
-interface Question {
-  id: string;
-  subject: 'DBMS' | 'PythonML' | 'CppOOP' | 'GenAI';
-  topic: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  question: string;
-  options: Array<{
-    text: string;
-    correct: boolean;
-  }>;
-  rationale: string;
-}
-```
+- Subject, Topic, Difficulty
+- Question text and options
+- Correct answers and rationales
+- Stored in MySQL via Prisma
 
-### Adding New Questions
+### User Progress
+- Question attempts with timestamps
+- Accuracy tracking per subject
+- Confidence levels
+- Mock interview records
+- Custom quiz history
 
-1. Edit the appropriate file in `src/data/`:
-   - `dbms.ts` - Database questions
-   - `python-ml.ts` - Python ML questions  
-   - `cpp-oop.ts` - C++ OOP questions
-   - `genai.ts` - GenAI questions
+### Mock Interview Records
+- Subject, difficulty, role
+- 5 questions with responses
+- Individual scores per question
+- Overall performance metrics
+- Detailed AI feedback
 
-2. Follow the existing question format
-3. Update the export in `src/data/index.ts`
+---
 
-### Adding New Subjects
+## Learning Best Practices
 
-1. Create a new data file in `src/data/`
-2. Add the subject to the `subjects` array in `src/data/index.ts`
-3. Update the routing in `src/app/quiz/[subject]/page.tsx`
+**For Quiz Practice:**
+1. Start with Easy difficulty to build confidence
+2. Use topic filters to focus on weak areas
+3. Review explanations even for correct answers
+4. Mark difficult questions with low confidence
+5. Retake subjects after reviewing errors
 
-## AI Features (Gemini Integration)
+**For Mock Interviews:**
+1. Practice regularly (2-3 times per week)
+2. Start with Beginner difficulty
+3. Record yourself to improve speaking skills
+4. Review feedback carefully
+5. Focus on one subject at a time initially
+6. Work on areas mentioned in "Areas for Improvement"
 
-The app includes optional AI-powered features that require a Google Gemini API key:
+**For Study Planning:**
+1. Use Study Coach to create structured plans
+2. Follow daily recommendations
+3. Mix quiz practice with interview practice
+4. Review Error Notebook weekly
+5. Track progress on the analytics dashboard
 
-### Setup
-1. Get a Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. In the app, go to Settings and enter your API key
-3. Click "Validate & Enable" to activate AI features
+---
 
-### Features
-- **Generate Similar Questions**: AI creates new questions similar to the current one
-- **Explain Like...**: Get explanations tailored to different learning levels
-- **Tutor Chat**: Interactive AI tutor for each subject/topic
+## License
 
-### Privacy & Security
-- API keys are stored only in browser cookies (not on any server)
-- All AI requests go directly from client to Google's API
-- No data is sent to any other servers
-
-## 📂 Project Structure
-
-```
-PrepMatrix/
-├── 📁 src/
-│   ├── 📁 app/                   # Next.js 14 App Router
-│   │   ├── 📄 layout.tsx         # Root layout with providers
-│   │   ├── 📄 page.tsx           # Dashboard home page
-│   │   ├── 📁 quiz/[subject]/    # Dynamic quiz routes
-│   │   ├── 📁 progress/          # Analytics dashboard
-│   │   └── 📁 settings/          # Configuration page
-│   ├── 📁 components/            # Reusable React components
-│   │   ├── 📁 dashboard/         # Dashboard components
-│   │   ├── 📁 quiz/              # Quiz interface
-│   │   ├── 📁 layout/            # Layout components
-│   │   └── 📁 ui/                # Common UI elements
-│   ├── 📁 data/                  # Question datasets
-│   ├── 📁 stores/                # Zustand state management
-│   ├── 📁 lib/                   # Utilities & API clients
-│   └── 📁 hooks/                 # Custom React hooks
-├── 📁 public/                    # Static assets
-└── 📄 tailwind.config.js         # Styling configuration
-```
-
-## 🔧 Adding New Content
-
-### **Adding Questions**
-1. Edit files in `src/data/` (dbms.ts, python-ml.ts, etc.)
-2. Follow the existing question schema
-3. Include rationale for correct answers
-
-### **Adding Subjects**
-1. Create new data file in `src/data/`
-2. Add to subjects array in `src/data/index.ts`
-3. Update routing in quiz pages
-
-## 🚀 Deployment
-
-### **Vercel (Recommended)**
-```bash
-pnpm build
-vercel deploy
-```
-
-### **Static Hosting**
-```bash
-pnpm build
-# Deploy 'out' folder to any static host
-```
-
-## 🤝 Contributing
-
-1. **Fork** the repository
-2. **Create** feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to branch (`git push origin feature/amazing-feature`)
-5. **Open** Pull Request
-
-### **Development Guidelines**
-- Follow TypeScript best practices
-- Use Tailwind CSS for styling
-- Maintain component modularity
-- Test your changes thoroughly
-
-## 📋 Roadmap
-
-- 🔄 **Spaced Repetition** - Intelligent question scheduling
-- 📱 **Mobile App** - Native mobile experience
-- 🏆 **Social Features** - Leaderboards and sharing
-- 🎯 **Advanced Analytics** - Detailed learning insights
-- 📚 **More Subjects** - System Design, Algorithms, etc.
-- 🌐 **Offline Mode** - Study without internet
-
-## 📜 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Google Gemini** - AI-powered learning features
-- **Next.js Team** - Amazing React framework
-- **Tailwind CSS** - Utility-first styling
-- **Zustand** - Simple state management
-- **Open Source Community** - Inspiration and support
+MIT License - Free to use and modify
 
 ---
 
 <div align="center">
 
-### 💡 Ready to ace your interviews?
-
-**[🚀 Start Learning](http://localhost:3000)** | **[📖 Docs](README.md)** | **[🐛 Issues](https://github.com/yourusername/prepmatrix/issues)**
-
-Made with ❤️ for developers, by developers
-
-⭐ **Star this repo if it helped you!** ⭐
+**Built for learners, by learners**
 
 </div>

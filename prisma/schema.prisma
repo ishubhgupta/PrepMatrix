@@ -31,6 +31,7 @@ model User {
   customSubjects CustomSubject[]
   chatMessages  ChatMessage[]
   learningProfile UserLearningProfile?
+  mockInterviews MockInterview[]
   
   @@index([email])
   @@map("users")
@@ -283,4 +284,78 @@ model UserLearningProfile {
   
   @@index([userId])
   @@map("user_learning_profiles")
+}
+
+// ==================== MOCK INTERVIEWS ====================
+
+model MockInterview {
+  id                  String    @id @default(cuid())
+  userId              String
+  subject             String    // DBMS, OS, GenAI, etc.
+  difficulty          String    // Junior, Mid-level, Senior
+  role                String    // Backend, Full-stack, ML Engineer
+  status              String    // in-progress, completed, abandoned
+  mode                String    @default("voice") // "text" or "voice"
+  interviewerProfile  String?   // "friendly", "professional", "challenging"
+  startedAt           DateTime  @default(now())
+  completedAt         DateTime?
+  duration            Int?      // seconds
+  
+  // Overall scores
+  overallScore        Float?    // 0-100
+  technicalAccuracy   Float?    // 0-100
+  communicationScore  Float?    // 0-100
+  depthScore          Float?    // 0-100
+  confidenceScore     Float?    // 0-100
+  
+  // Voice-specific metrics
+  avgSpeakingPace     Float?    // words per minute
+  totalFillerWords    Int?
+  totalSpeakingTime   Int?      // seconds
+  longestPause        Int?      // seconds
+  
+  feedback            String?   @db.Text
+  
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questions           MockInterviewQuestion[]
+  
+  @@index([userId])
+  @@index([status])
+  @@index([subject])
+  @@map("mock_interviews")
+}
+
+model MockInterviewQuestion {
+  id                  String    @id @default(cuid())
+  interviewId         String
+  questionNumber      Int       // 1, 2, 3...
+  question            String    @db.Text
+  userAnswer          String?   @db.Text
+  transcriptRaw       String?   @db.Text  // Raw speech-to-text
+  isFollowUp          Boolean   @default(false)
+  parentQuestionId    String?   // If this is a follow-up
+  
+  // Evaluation
+  technicalScore      Float?    // 0-100
+  clarityScore        Float?    // 0-100
+  depthScore          Float?    // 0-100
+  confidenceScore     Float?    // 0-100
+  
+  // Voice metrics
+  speakingDuration    Int?      // seconds
+  wordsPerMinute      Float?
+  fillerWordCount     Int?
+  pauseCount          Int?
+  longestPause        Int?      // seconds
+  
+  feedback            String?   @db.Text
+  strengths           String?   @db.Text // JSON array
+  weaknesses          String?   @db.Text // JSON array
+  
+  createdAt           DateTime  @default(now())
+  
+  interview           MockInterview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  
+  @@index([interviewId])
+  @@map("mock_interview_questions")
 }

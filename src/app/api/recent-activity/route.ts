@@ -42,8 +42,21 @@ export async function GET(request: NextRequest) {
       take: 10
     });
 
+    // Get last 10 mock interviews
+    const mockInterviews = await prisma.mockInterview.findMany({
+      where: {
+        userId: user.id,
+        status: 'completed'
+      },
+      orderBy: {
+        completedAt: 'desc'
+      },
+      take: 10
+    });
+
     const formattedAttempts = attempts.map(attempt => ({
       id: attempt.id,
+      type: 'quiz' as const,
       questionText: attempt.question.questionText,
       subject: attempt.question.subject,
       topic: attempt.question.topic,
@@ -52,9 +65,24 @@ export async function GET(request: NextRequest) {
       confidence: attempt.confidence
     }));
 
+    const formattedInterviews = mockInterviews.map(interview => ({
+      id: interview.id,
+      type: 'interview' as const,
+      subject: interview.subject,
+      difficulty: interview.difficulty,
+      role: interview.role,
+      overallScore: interview.overallScore,
+      attemptedAt: interview.completedAt?.toISOString() || interview.startedAt.toISOString()
+    }));
+
+    // Combine and sort by date
+    const allActivities = [...formattedAttempts, ...formattedInterviews]
+      .sort((a, b) => new Date(b.attemptedAt).getTime() - new Date(a.attemptedAt).getTime())
+      .slice(0, 10);
+
     return NextResponse.json({
       success: true,
-      attempts: formattedAttempts
+      attempts: allActivities
     });
   } catch (error) {
     console.error('Error fetching recent activity:', error);

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { Menu, X, ChevronDown, User, LogOut, LogIn, BookOpen, AlertTriangle, TrendingUp, Calendar, Home as HomeIcon, Brain, Sparkles } from 'lucide-react';
+import { Menu, X, ChevronDown, User, LogOut, LogIn, BookOpen, AlertTriangle, TrendingUp, Calendar, Home as HomeIcon, Brain, Sparkles, Mic } from 'lucide-react';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -144,6 +144,18 @@ export function Header() {
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>AI Quiz</span>
+                </Link>
+
+                <Link
+                  href="/mock-interview"
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
+                    isActive('/mock-interview')
+                      ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
+                      : 'text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5'
+                  }`}
+                >
+                  <Mic className="w-4 h-4" />
+                  <span>Mock Interview</span>
                 </Link>
               </>
             )}

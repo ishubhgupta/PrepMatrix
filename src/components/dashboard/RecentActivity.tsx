@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { Clock, CheckCircle, XCircle, TrendingUp } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, TrendingUp, Mic, Award } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-interface RecentAttempt {
+interface QuizAttempt {
   id: string;
+  type: 'quiz';
   questionText: string;
   subject: string;
   topic: string;
@@ -14,11 +16,24 @@ interface RecentAttempt {
   confidence?: string;
 }
 
+interface InterviewAttempt {
+  id: string;
+  type: 'interview';
+  subject: string;
+  difficulty: string;
+  role: string;
+  overallScore: number;
+  attemptedAt: string;
+}
+
+type RecentAttempt = QuizAttempt | InterviewAttempt;
+
 export function RecentActivity() {
   const [mounted, setMounted] = useState(false);
   const [attempts, setAttempts] = useState<RecentAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -80,15 +95,23 @@ export function RecentActivity() {
         <div className="card p-8 text-center">
           <Clock className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
           <p className="text-lg" style={{ color: 'var(--text-muted)' }}>
-            No activity yet. Start practicing to see your recent attempts!
+            No activity yet. Start practicing or take a mock interview!
           </p>
         </div>
       </div>
     );
   }
 
-  const correctCount = attempts.filter(a => a.isCorrect).length;
-  const accuracy = Math.round((correctCount / attempts.length) * 100);
+  const quizAttempts = attempts.filter((a): a is QuizAttempt => a.type === 'quiz');
+  const correctCount = quizAttempts.filter(a => a.isCorrect).length;
+  const accuracy = quizAttempts.length > 0 ? Math.round((correctCount / quizAttempts.length) * 100) : 0;
+
+  const getScoreColor = (score: number) => {
+    if (score >= 85) return '#10b981';
+    if (score >= 70) return '#f59e0b';
+    if (score >= 50) return '#f97316';
+    return '#ef4444';
+  };
 
   return (
     <div className="mb-12">
@@ -110,6 +133,52 @@ export function RecentActivity() {
       <div className="card divide-y divide-black/5">
         {attempts.slice(0, 5).map((attempt) => {
           const timeAgo = getTimeAgo(attempt.attemptedAt);
+          
+          if (attempt.type === 'interview') {
+            return (
+              <div 
+                key={attempt.id} 
+                className="p-4 hover:bg-black/[0.02] transition-colors cursor-pointer"
+                onClick={() => router.push(`/mock-interview/results/${attempt.id}`)}
+              >
+                <div className="flex items-start gap-4">
+                  <div 
+                    className="p-2 rounded-lg flex-shrink-0"
+                    style={{ backgroundColor: 'var(--accent-soft)' }}
+                  >
+                    <Mic className="w-5 h-5" style={{ color: 'var(--accent)' }} />
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-4 mb-1">
+                      <div>
+                        <p className="font-medium" style={{ color: 'var(--text-strong)' }}>
+                          Mock Interview - {attempt.subject}
+                        </p>
+                        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                          {attempt.role.replace(/-/g, ' ')} • {attempt.difficulty}
+                        </p>
+                      </div>
+                      <span className="text-xs flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
+                        {timeAgo}
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mt-2">
+                      <Award className="w-4 h-4" style={{ color: getScoreColor(attempt.overallScore) }} />
+                      <span 
+                        className="text-sm font-semibold"
+                        style={{ color: getScoreColor(attempt.overallScore) }}
+                      >
+                        Score: {attempt.overallScore}/100
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
           return (
             <div key={attempt.id} className="p-4 hover:bg-black/[0.02] transition-colors">
               <div className="flex items-start gap-4">
