@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import VoiceInterviewSession from '@/components/mock-interview/VoiceInterviewSession';
 
-export default function InterviewSessionPage() {
+function InterviewSessionContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { status } = useSession();
@@ -84,5 +84,22 @@ export default function InterviewSessionPage() {
       interviewId={interviewData.interview.id}
       initialQuestion={interviewData.currentQuestion}
     />
+  );
+}
+
+export default function InterviewSessionPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
+        <div className="text-center">
+          <div className="animate-pulse">
+            <div className="w-16 h-16 rounded-full mx-auto mb-4" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
+            <p style={{ color: 'var(--text-muted)' }}>Loading interview...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <InterviewSessionContent />
+    </Suspense>
   );
 }
