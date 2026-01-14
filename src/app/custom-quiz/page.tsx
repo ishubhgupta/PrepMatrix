@@ -39,6 +39,7 @@ export default function CustomQuizPage() {
     if (session?.user) {
       fetchQuizzes();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
   const fetchQuizzes = async () => {

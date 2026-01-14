@@ -110,6 +110,18 @@ export function Header() {
             {status === 'authenticated' && (
               <>
                 <Link
+                  href="/study-coach"
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
+                    isActive('/study-coach')
+                      ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
+                      : 'text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5'
+                  }`}
+                >
+                  <Brain className="w-4 h-4" />
+                  <span>Study Coach</span>
+                </Link>
+
+                <Link
                   href="/custom-quiz"
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
                     isActive('/custom-quiz')
@@ -255,6 +267,9 @@ export function Header() {
                 <div className="px-4 py-2 text-xs font-semibold uppercase mt-4" style={{ color: 'var(--text-muted)' }}>
                   Your Tools
                 </div>
+                <Link href="/study-coach" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
+                  AI Study Coach
+                </Link>
                 <Link href="/errors" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
                   Error Notebook
                 </Link>

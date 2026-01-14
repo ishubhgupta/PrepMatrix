@@ -46,6 +46,7 @@ export default function CustomQuizPlayPage({ params }: { params: { id: string } 
     if (session?.user && !hasFetched) {
       fetchQuizData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, params.id, hasFetched]);
 
   const fetchQuizData = async () => {
