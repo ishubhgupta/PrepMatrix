@@ -128,7 +128,7 @@ export default function CustomQuizPage() {
           
           <button
             onClick={() => setShowCreateModal(true)}
-            className="btn-primary inline-flex items-center gap-2"
+            className="btn-primary inline-flex items-center gap-2 rounded-2xl px-3 py-2"
           >
             <Plus className="w-5 h-5" />
             Create New Quiz
@@ -155,7 +155,7 @@ export default function CustomQuizPage() {
             </p>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="btn-primary inline-flex items-center gap-2"
+              className="btn-primary inline-flex items-center gap-2 rounded-2xl px-3 py-2"
             >
               <Plus className="w-5 h-5" />
               Create Your First Quiz
@@ -219,8 +219,8 @@ export default function CustomQuizPage() {
                 {quiz.status === 'ready' && (
                   <button
                     onClick={() => handleStartQuiz(quiz.id)}
-                    className="btn-primary w-full inline-flex items-center justify-center gap-2"
-                  >
+                    className="btn-primary w-full inline-flex items-center justify-center gap-2 rounded-2xl px-3 py-2"
+                    >
                     <Play className="w-4 h-4" />
                     Start Quiz
                   </button>
