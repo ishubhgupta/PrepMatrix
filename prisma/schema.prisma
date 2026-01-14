@@ -29,6 +29,8 @@ model User {
   studyPlans    StudyPlan[]
   studySessions StudySession[]
   customSubjects CustomSubject[]
+  chatMessages  ChatMessage[]
+  learningProfile UserLearningProfile?
   
   @@index([email])
   @@map("users")
@@ -237,4 +239,48 @@ model CustomSubject {
   @@index([userId])
   @@index([status])
   @@map("custom_subjects")
+}
+
+// ==================== ADAPTIVE CHATBOT ====================
+
+model ChatMessage {
+  id              String   @id @default(cuid())
+  userId          String
+  role            String   // "user" or "assistant"
+  content         String   @db.Text
+  topic           String?  // Detected topic (GenAI, DBMS, etc.)
+  complexity      String?  // "beginner", "intermediate", "advanced"
+  isFollowUp      Boolean  @default(false) // If asking clarification
+  sessionId       String?  // Group messages by session
+  responseTime    Int?     // Time taken to generate response (ms)
+  createdAt       DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([sessionId])
+  @@index([createdAt])
+  @@index([topic])
+  @@map("chat_messages")
+}
+
+model UserLearningProfile {
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  learningPace            String   @default("medium") // "slow", "medium", "fast"
+  preferredStyle          String   @default("balanced") // "simple", "balanced", "technical"
+  avgQuestionsPerTopic    Float    @default(3.0)
+  avgFollowUpsPerTopic    Float    @default(1.0)
+  comprehensionIndicator  Float    @default(0.5) // 0-1 scale
+  totalInteractions       Int      @default(0)
+  frequentTopics          String?  @db.Text // JSON array of topics
+  difficultyPreference    String?  // Topics user prefers
+  lastInteractionAt       DateTime?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@map("user_learning_profiles")
 }

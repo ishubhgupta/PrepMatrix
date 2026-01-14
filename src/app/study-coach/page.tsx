@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { Header } from '@/components/layout/Header';
 import { CustomPlanModal } from '@/components/study-coach/CustomPlanModal';
 import { StudyCoachChatbot } from '@/components/study-coach/StudyCoachChatbot';
+import { AdaptiveChatbot } from '@/components/study-coach/AdaptiveChatbot';
 import { Sparkles, Clock, Target, TrendingUp, CheckCircle2, Circle, Loader2, BarChart3, Brain, BookOpen, History } from 'lucide-react';
 import { useStudyCoachStore } from '@/lib/store/study-coach-store';
 
@@ -689,6 +690,9 @@ export default function StudyCoachPage() {
             onClose={() => setShowChatbot(false)}
           />
         )}
+
+        {/* Adaptive AI Tutor - Always Available */}
+        <AdaptiveChatbot />
       </main>
     </div>
   );

@@ -48,7 +48,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href={status === 'authenticated' ? '/dashboard' : '/'} className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-xl bg-[color:var(--accent)] text-white font-bold text-sm flex items-center justify-center shadow-[var(--shadow-softer)] transition-transform group-hover:scale-105">
               PM
             </div>
@@ -59,17 +59,30 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
-            {/* Current Page Indicator */}
-            <Link
-              href="/"
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                isActive('/') && pathname === '/'
-                  ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
-                  : 'text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5'
-              }`}
-            >
-              <HomeIcon className="w-4 h-4" />
-            </Link>
+            {/* Home/Dashboard Link */}
+            {status === 'authenticated' ? (
+              <Link
+                href="/dashboard"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  isActive('/dashboard')
+                    ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
+                    : 'text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5'
+                }`}
+              >
+                <HomeIcon className="w-4 h-4" />
+              </Link>
+            ) : (
+              <Link
+                href="/"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  isActive('/') && pathname === '/'
+                    ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
+                    : 'text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5'
+                }`}
+              >
+                <HomeIcon className="w-4 h-4" />
+              </Link>
+            )}
 
             {/* Subject Dropdown */}
             <div className="relative" ref={subjectRef}>
@@ -131,18 +144,6 @@ export function Header() {
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>AI Quiz</span>
-                </Link>
-
-                <Link
-                  href="/progress"
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
-                    isActive('/progress')
-                      ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
-                      : 'text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)] hover:bg-black/5'
-                  }`}
-                >
-                  <Calendar className="w-4 h-4" />
-                  <span>Progress</span>
                 </Link>
               </>
             )}
@@ -232,17 +233,31 @@ export function Header() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-black/5 py-4 space-y-1">
-            <Link
-              href="/"
-              onClick={() => setMobileMenuOpen(false)}
-              className={`block px-4 py-2 text-base font-medium rounded-lg ${
-                isActive('/') && pathname === '/'
-                  ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
-                  : 'text-[color:var(--text-muted)]'
-              }`}
-            >
-              Home
-            </Link>
+            {status === 'authenticated' ? (
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2 text-base font-medium rounded-lg ${
+                  isActive('/dashboard')
+                    ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
+                    : 'text-[color:var(--text-muted)]'
+                }`}
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-4 py-2 text-base font-medium rounded-lg ${
+                  isActive('/') && pathname === '/'
+                    ? 'text-[color:var(--accent)] bg-[color:var(--accent-soft)]'
+                    : 'text-[color:var(--text-muted)]'
+                }`}
+              >
+                Home
+              </Link>
+            )}
 
             <div className="px-4 py-2 text-xs font-semibold uppercase" style={{ color: 'var(--text-muted)' }}>
               Subjects
@@ -281,9 +296,6 @@ export function Header() {
                 </Link>
                 <Link href="/analytics" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
                   Analytics
-                </Link>
-                <Link href="/progress" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
-                  Progress
                 </Link>
                 <Link href="/settings" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
                   Settings
