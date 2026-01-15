@@ -101,7 +101,7 @@ export default function CustomQuizPage() {
         <main className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
-              <div className="text-4xl mb-3">⏳</div>
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-solid border-current border-r-transparent align-[-0.125em] mb-3" style={{ color: 'var(--accent)' }}></div>
               <p style={{ color: 'var(--text-muted)' }}>Loading...</p>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function CustomQuizPage() {
         {/* Quiz List */}
         {quizzes.length === 0 ? (
           <div className="card p-12 text-center">
-            <div className="text-6xl mb-4 opacity-20">🎯</div>
+            <Sparkles className="w-16 h-16 mx-auto mb-4 opacity-20" style={{ color: 'var(--accent)' }} />
             <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-strong)' }}>
               No Custom Quizzes Yet
             </h3>

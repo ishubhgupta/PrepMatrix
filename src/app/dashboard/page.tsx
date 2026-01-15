@@ -30,8 +30,8 @@ export default function DashboardPage() {
         <Header />
         <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex items-center justify-center h-64">
-            <div className="animate-pulse">
-              <div className="w-16 h-16 rounded-full mx-auto mb-4" style={{ backgroundColor: 'var(--accent-soft)' }}></div>
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-solid border-current border-r-transparent align-[-0.125em] mb-4" style={{ color: 'var(--accent)' }}></div>
               <p style={{ color: 'var(--text-muted)' }}>Loading your dashboard...</p>
             </div>
           </div>
@@ -53,9 +53,6 @@ export default function DashboardPage() {
         {/* Welcome Section */}
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'var(--accent-soft)' }}>
-              <span className="text-2xl">👋</span>
-            </div>
             <div>
               <h1 className="text-3xl md:text-4xl font-bold" style={{ color: 'var(--text-strong)' }}>
                 Welcome back, {session.user.name?.split(' ')[0] || 'there'}!
