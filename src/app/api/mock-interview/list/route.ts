@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
         depthScore: interview.depthScore,
         confidenceScore: interview.confidenceScore,
         questionCount: interview.questions.length,
+        hasFeedback: !!interview.feedback,
       })),
     });
   } catch (error) {

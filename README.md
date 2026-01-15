@@ -40,7 +40,6 @@ Track mistakes, review incorrect answers, and learn from your errors with AI exp
 3. Answer questions by selecting options and clicking "Submit Answer"
 4. View instant feedback with explanations
 5. Track your progress in real-time with the progress bar
-6. Use confidence indicators to mark question difficulty for spaced repetition
 
 **Key Features:**
 - **Topic-based filtering** - Focus on specific areas you want to improve
@@ -320,7 +319,6 @@ Open [http://localhost:3000](http://localhost:3000)
 ### User Progress
 - Question attempts with timestamps
 - Accuracy tracking per subject
-- Confidence levels
 - Mock interview records
 - Custom quiz history
 
@@ -339,8 +337,7 @@ Open [http://localhost:3000](http://localhost:3000)
 1. Start with Easy difficulty to build confidence
 2. Use topic filters to focus on weak areas
 3. Review explanations even for correct answers
-4. Mark difficult questions with low confidence
-5. Retake subjects after reviewing errors
+4. Retake subjects after reviewing errors
 
 **For Mock Interviews:**
 1. Practice regularly (2-3 times per week)

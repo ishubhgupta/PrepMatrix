@@ -180,7 +180,7 @@ export function CreateQuizModal({ onClose, onSuccess }: CreateQuizModalProps) {
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="E.g., 'I want to practice Computer Networks TCP/IP and routing protocols' or 'React Hooks and state management'"
+              placeholder="E.g., 'SQL queries and database design' or 'React Hooks and state management' - ANY topic works!"
               className="w-full px-4 py-3 rounded-xl border-2 border-secondary-200 focus:border-accent outline-none transition-colors resize-none"
               rows={4}
               style={{ 
@@ -189,7 +189,7 @@ export function CreateQuizModal({ onClose, onSuccess }: CreateQuizModalProps) {
               }}
             />
             <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-              {prompt.length} / 10 characters minimum
+              {prompt.length} / 10 characters minimum • Type any subject or topic you want to practice
             </p>
           </div>
 
@@ -223,7 +223,7 @@ export function CreateQuizModal({ onClose, onSuccess }: CreateQuizModalProps) {
                 💡 We found related subjects: <strong>{suggestions.join(', ')}</strong>
               </p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Consider practicing those first if you haven't already!
+                You can still generate your custom quiz, or practice these existing subjects first!
               </p>
             </div>
           )}
@@ -240,11 +240,15 @@ export function CreateQuizModal({ onClose, onSuccess }: CreateQuizModalProps) {
                   onClick={() => setQuestionCount(count)}
                   className={`p-4 rounded-xl border-2 transition-all ${
                     questionCount === count
-                      ? 'border-accent bg-accent/10'
+                      ? 'border-[3px] shadow-md'
                       : 'border-secondary-200 hover:border-secondary-300'
                   }`}
+                  style={{
+                    borderColor: questionCount === count ? 'var(--accent)' : undefined,
+                    backgroundColor: questionCount === count ? 'rgba(var(--accent-rgb), 0.1)' : undefined,
+                  }}
                 >
-                  <div className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>
+                  <div className="text-2xl font-bold" style={{ color: questionCount === count ? 'var(--accent)' : 'var(--text-strong)' }}>
                     {count}
                   </div>
                   <div className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>

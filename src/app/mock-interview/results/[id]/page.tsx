@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { useUIStore } from '@/lib/store/ui-store';
 import { Header } from '@/components/layout/Header';
-import { Award, Clock, TrendingUp, MessageSquare, Target, ChevronDown, ChevronUp, Play, Home } from 'lucide-react';
+import { Award, Clock, TrendingUp, MessageSquare, Target, ChevronDown, ChevronUp, Play, Home, Volume2, Pause } from 'lucide-react';
 
 interface VoiceMetrics {
   avgSpeakingPace: number;
@@ -17,6 +18,8 @@ interface QuestionResult {
   number: number;
   question: string;
   answer: string;
+  questionAudioUrl?: string | null;
+  answerAudioUrl?: string | null;
   scores: {
     technical: number;
     clarity: number;
@@ -52,10 +55,13 @@ export default function InterviewResultsPage({
 }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { showToast } = useUIStore();
   const [results, setResults] = useState<InterviewResults | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
+  const [playingAudio, setPlayingAudio] = useState<{type: 'question' | 'answer', number: number} | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -71,7 +77,7 @@ export default function InterviewResultsPage({
   const fetchResults = async () => {
     try {
       const response = await fetch(`/api/mock-interview/${params.id}/complete`, {
-        method: 'POST',
+        method: 'GET',
       });
 
       const data = await response.json();
@@ -80,7 +86,55 @@ export default function InterviewResultsPage({
         throw new Error(data.error || 'Failed to fetch results');
       }
 
-      setResults(data.results);
+      // Check if still processing
+      if (data.status === 'processing') {
+        setError('Your interview results are being processed. Please wait...');
+        showToast('info', 'Processing your interview results...', 3000);
+        // Retry after 3 seconds
+        setTimeout(() => {
+          fetchResults();
+        }, 3000);
+        return;
+      }
+
+      // Map data to results format
+      setResults({
+        overallScore: data.overallScore,
+        technicalAccuracy: data.averageScores.technical,
+        communicationScore: data.averageScores.clarity,
+        depthScore: data.averageScores.depth,
+        confidenceScore: data.averageScores.confidence,
+        duration: data.duration,
+        voiceMetrics: {
+          avgSpeakingPace: data.questions[0]?.wordsPerMinute || 0,
+          totalFillerWords: data.questions.reduce((sum: number, q: any) => sum + (q.fillerWordCount || 0), 0),
+          totalSpeakingTime: data.duration,
+          longestPause: Math.max(...data.questions.map((q: any) => q.longestPause || 0)),
+        },
+        overallFeedback: data.feedback,
+        questionResults: data.questions.map((q: any) => ({
+          number: q.number,
+          question: q.question,
+          answer: q.userAnswer || '',
+          questionAudioUrl: q.questionAudioUrl,
+          answerAudioUrl: q.answerAudioUrl,
+          scores: {
+            technical: q.technicalScore || 0,
+            clarity: q.clarityScore || 0,
+            depth: q.depthScore || 0,
+            confidence: q.confidenceScore || 0,
+          },
+          feedback: q.feedback || 'Processing...',
+          strengths: q.strengths || [],
+          weaknesses: q.weaknesses || [],
+          voiceMetrics: {
+            wpm: q.wordsPerMinute || 0,
+            fillers: q.fillerWordCount || 0,
+            duration: q.speakingDuration || 0,
+          },
+        })),
+      });
+      setError(''); // Clear any previous errors
     } catch (err: any) {
       console.error('Error fetching results:', err);
       setError(err.message || 'Failed to load results');
@@ -143,26 +197,27 @@ export default function InterviewResultsPage({
   };
 
   const formatFeedback = (feedback: string) => {
+    if (!feedback || feedback === 'Processing feedback...') {
+      return <p style={{ color: 'var(--text-muted)' }}>Feedback is being generated...</p>;
+    }
+
     const lines = feedback.split('\n');
     const formatted: JSX.Element[] = [];
-    let currentSection: JSX.Element[] = [];
     let currentListItems: string[] = [];
-    let inList = false;
 
     const flushList = () => {
       if (currentListItems.length > 0) {
         formatted.push(
-          <ul key={`list-${formatted.length}`} className="list-none space-y-2 mb-6">
+          <ul key={`list-${formatted.length}`} className="list-none space-y-2 mb-4 ml-4">
             {currentListItems.map((item, idx) => (
-              <li key={idx} className="flex items-start gap-2">
-                <span style={{ color: 'var(--accent)' }}>•</span>
-                <span>{item}</span>
+              <li key={idx} className="flex items-start gap-3">
+                <span className="mt-1.5" style={{ color: 'var(--accent)' }}>•</span>
+                <span className="flex-1" style={{ color: 'var(--text-normal)' }}>{item}</span>
               </li>
             ))}
           </ul>
         );
         currentListItems = [];
-        inList = false;
       }
     };
 
@@ -174,21 +229,43 @@ export default function InterviewResultsPage({
         return;
       }
 
-      // Check if it's a header (starts with ##)
+      // Headers
       if (trimmed.startsWith('##')) {
         flushList();
         const headerText = trimmed.replace(/^##\s*/, '');
         formatted.push(
-          <h3 key={`h-${index}`} className="text-xl font-bold mt-6 mb-3" style={{ color: 'var(--text-strong)' }}>
+          <h3 key={`h-${index}`} className="text-xl font-bold mt-8 mb-4 first:mt-0" style={{ color: 'var(--text-strong)' }}>
             {headerText}
           </h3>
         );
+      } else if (trimmed.startsWith('#') && !trimmed.startsWith('##')) {
+        flushList();
+        const headerText = trimmed.replace(/^#\s*/, '');
+        formatted.push(
+          <h2 key={`h1-${index}`} className="text-2xl font-bold mt-8 mb-4 first:mt-0" style={{ color: 'var(--text-strong)' }}>
+            {headerText}
+          </h2>
+        );
       }
-      // Check if it's a bullet point (starts with • or -)
-      else if (trimmed.startsWith('•') || trimmed.startsWith('-')) {
-        inList = true;
-        const itemText = trimmed.replace(/^[•-]\s*/, '');
+      // Bullet points
+      else if (trimmed.match(/^[-•*]\s+/)) {
+        const itemText = trimmed.replace(/^[-•*]\s+/, '');
         currentListItems.push(itemText);
+      }
+      // Paragraphs with bold text
+      else if (trimmed.includes('**')) {
+        flushList();
+        const parts = trimmed.split(/(\*\*[^*]+\*\*)/g);
+        formatted.push(
+          <p key={`p-${index}`} className="mb-4 leading-relaxed" style={{ color: 'var(--text-normal)' }}>
+            {parts.map((part, i) => {
+              if (part.startsWith('**') && part.endsWith('**')) {
+                return <strong key={i} style={{ color: 'var(--text-strong)', fontWeight: 600 }}>{part.slice(2, -2)}</strong>;
+              }
+              return <span key={i}>{part}</span>;
+            })}
+          </p>
+        );
       }
       // Regular paragraph
       else {
@@ -201,9 +278,53 @@ export default function InterviewResultsPage({
       }
     });
 
-    flushList(); // Flush any remaining list items
+    flushList();
+    return <div className="max-w-none">{formatted}</div>;
+  };
 
-    return <div>{formatted}</div>;
+  // Audio playback functions
+  const playAudio = (audioUrl: string, type: 'question' | 'answer', questionNumber: number) => {
+    // Stop any currently playing audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+
+    // Check if it's a TTS marker (JSON string)
+    try {
+      const audioData = JSON.parse(audioUrl);
+      if (audioData.text) {
+        // Use Web Speech API to replay the question
+        const utterance = new SpeechSynthesisUtterance(audioData.text);
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        utterance.onend = () => setPlayingAudio(null);
+        utterance.onerror = () => setPlayingAudio(null);
+        
+        speechSynthesis.speak(utterance);
+        setPlayingAudio({ type, number: questionNumber });
+        return;
+      }
+    } catch (e) {
+      // Not JSON, treat as base64 audio
+    }
+
+    // Play recorded audio
+    const audio = new Audio(audioUrl);
+    audio.onended = () => setPlayingAudio(null);
+    audio.onerror = () => setPlayingAudio(null);
+    audio.play();
+    audioRef.current = audio;
+    setPlayingAudio({ type, number: questionNumber });
+  };
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    speechSynthesis.cancel();
+    setPlayingAudio(null);
   };
 
   return (
@@ -324,6 +445,72 @@ export default function InterviewResultsPage({
 
                 {expandedQuestion === q.number && (
                   <div className="px-6 pb-6 space-y-4">
+                    {/* Audio Playback Controls */}
+                    {(q.questionAudioUrl || q.answerAudioUrl) && (
+                      <div className="flex flex-wrap gap-3 p-4 rounded-lg" style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.05)' }}>
+                        {q.questionAudioUrl && (
+                          <button
+                            onClick={() => {
+                              if (playingAudio?.type === 'question' && playingAudio?.number === q.number) {
+                                stopAudio();
+                              } else {
+                                playAudio(q.questionAudioUrl!, 'question', q.number);
+                              }
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all"
+                            style={{ 
+                              backgroundColor: playingAudio?.type === 'question' && playingAudio?.number === q.number 
+                                ? 'var(--accent)' 
+                                : 'white',
+                              color: playingAudio?.type === 'question' && playingAudio?.number === q.number 
+                                ? 'white' 
+                                : 'var(--text-strong)',
+                              border: '2px solid var(--accent)'
+                            }}
+                          >
+                            {playingAudio?.type === 'question' && playingAudio?.number === q.number ? (
+                              <Pause className="w-4 h-4" />
+                            ) : (
+                              <Volume2 className="w-4 h-4" />
+                            )}
+                            <span className="text-sm">
+                              {playingAudio?.type === 'question' && playingAudio?.number === q.number ? 'Stop' : 'Play'} AI Question
+                            </span>
+                          </button>
+                        )}
+                        {q.answerAudioUrl && (
+                          <button
+                            onClick={() => {
+                              if (playingAudio?.type === 'answer' && playingAudio?.number === q.number) {
+                                stopAudio();
+                              } else {
+                                playAudio(q.answerAudioUrl!, 'answer', q.number);
+                              }
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all"
+                            style={{ 
+                              backgroundColor: playingAudio?.type === 'answer' && playingAudio?.number === q.number 
+                                ? '#10b981' 
+                                : 'white',
+                              color: playingAudio?.type === 'answer' && playingAudio?.number === q.number 
+                                ? 'white' 
+                                : 'var(--text-strong)',
+                              border: '2px solid #10b981'
+                            }}
+                          >
+                            {playingAudio?.type === 'answer' && playingAudio?.number === q.number ? (
+                              <Pause className="w-4 h-4" />
+                            ) : (
+                              <Volume2 className="w-4 h-4" />
+                            )}
+                            <span className="text-sm">
+                              {playingAudio?.type === 'answer' && playingAudio?.number === q.number ? 'Stop' : 'Play'} Your Answer
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+
                     <div>
                       <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-muted)' }}>Your Answer:</h4>
                       <p style={{ color: 'var(--text-normal)' }}>{q.answer}</p>

@@ -43,6 +43,7 @@ interface Interview {
   depthScore: number | null;
   confidenceScore: number | null;
   questionCount: number;
+  hasFeedback: boolean;
 }
 
 export default function MockInterviewPage() {
@@ -66,6 +67,21 @@ export default function MockInterviewPage() {
       fetchPreviousInterviews();
     }
   }, [status, router]);
+
+  // Auto-refresh if any interviews are processing
+  useEffect(() => {
+    const hasProcessing = previousInterviews.some(
+      i => i.status === 'completed' && !i.hasFeedback
+    );
+    
+    if (hasProcessing) {
+      const interval = setInterval(() => {
+        fetchPreviousInterviews();
+      }, 5000); // Refresh every 5 seconds
+      
+      return () => clearInterval(interval);
+    }
+  }, [previousInterviews]);
 
   const fetchPreviousInterviews = async () => {
     try {
@@ -121,7 +137,7 @@ export default function MockInterviewPage() {
 
       // Close modal and navigate to session
       setShowModal(false);
-      router.push(`/mock-interview/session?id=${data.interview.id}&qid=${data.currentQuestion.id}`);
+      router.push(`/mock-interview/session?id=${data.interview.id}`);
     } catch (err: any) {
       console.error('Error starting interview:', err);
       setError(err.message || 'Failed to start interview. Please try again.');
@@ -269,6 +285,11 @@ export default function MockInterviewPage() {
                         </div>
                         <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Confidence</div>
                       </div>
+                    </div>
+                  ) : interview.status === 'completed' && !interview.hasFeedback ? (
+                    <div className="mb-3 p-3 rounded text-center text-sm flex items-center justify-center gap-2" style={{ backgroundColor: '#fef3c7', color: '#d97706' }}>
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                      Processing Results...
                     </div>
                   ) : (
                     <div className="mb-3 p-2 rounded text-center text-sm" style={{ backgroundColor: 'var(--accent-soft)', color: 'var(--accent)' }}>

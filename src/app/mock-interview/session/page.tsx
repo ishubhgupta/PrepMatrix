@@ -13,7 +13,6 @@ function InterviewSessionContent() {
   const [loading, setLoading] = useState(true);
 
   const interviewId = searchParams.get('id');
-  const questionId = searchParams.get('qid');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -21,25 +20,24 @@ function InterviewSessionContent() {
       return;
     }
 
-    if (status === 'authenticated' && interviewId && questionId) {
+    if (status === 'authenticated' && interviewId) {
       // Fetch interview data
       fetchInterviewData();
     }
-  }, [status, interviewId, questionId]);
+  }, [status, interviewId]);
 
   const fetchInterviewData = async () => {
     try {
-      const response = await fetch(`/api/mock-interview/${interviewId}/current`);
+      // Fetch full interview with all questions
+      const response = await fetch(`/api/mock-interview/${interviewId}/questions`);
       const data = await response.json();
       
       if (data.success) {
         setInterviewData({
           interview: { id: interviewId },
-          currentQuestion: {
-            id: questionId,
-            number: data.questionNumber || 1,
-            text: data.question,
-          },
+          allQuestions: data.questions,
+          currentQuestion: data.questions[0], // Start with first question
+          totalQuestions: data.questions.length,
         });
       }
     } catch (error) {
@@ -83,6 +81,8 @@ function InterviewSessionContent() {
     <VoiceInterviewSession
       interviewId={interviewData.interview.id}
       initialQuestion={interviewData.currentQuestion}
+      allQuestions={interviewData.allQuestions}
+      totalQuestions={interviewData.totalQuestions}
     />
   );
 }
