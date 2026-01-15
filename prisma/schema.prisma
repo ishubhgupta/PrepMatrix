@@ -335,6 +335,10 @@ model MockInterviewQuestion {
   isFollowUp          Boolean   @default(false)
   parentQuestionId    String?   // If this is a follow-up
   
+  // Audio recordings (base64 data URLs)
+  questionAudioUrl    String?   @db.LongText // AI voice question audio
+  answerAudioUrl      String?   @db.LongText // User answer audio
+  
   // Evaluation
   technicalScore      Float?    // 0-100
   clarityScore        Float?    // 0-100

@@ -4,7 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 import { useSpeechRecognition } from '@/lib/hooks/useSpeechRecognition';
 import { useTextToSpeech } from '@/lib/hooks/useTextToSpeech';
 import { useRouter } from 'next/navigation';
+import { useUIStore } from '@/lib/store/ui-store';
 import { Mic, Square, Send, Volume2, AlertCircle, CheckCircle } from 'lucide-react';
+
+// Audio recording utilities
+let mediaRecorder: MediaRecorder | null = null;
+let audioChunks: Blob[] = [];
 
 interface Question {
   id: string;
@@ -30,20 +35,28 @@ interface Evaluation {
 
 export default function VoiceInterviewSession({ 
   interviewId, 
-  initialQuestion 
+  initialQuestion,
+  allQuestions,
+  totalQuestions
 }: { 
   interviewId: string;
   initialQuestion: Question;
+  allQuestions: Question[];
+  totalQuestions: number;
 }) {
   const router = useRouter();
+  const { showToast } = useUIStore();
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState<Question>(initialQuestion);
   const [isAnswering, setIsAnswering] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [interviewComplete, setInterviewComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [questionCount, setQuestionCount] = useState(1);
+  const [isRecordingAudio, setIsRecordingAudio] = useState(false);
+  const [questionAudioUrl, setQuestionAudioUrl] = useState<string | null>(null);
   
   const startTimeRef = useRef<number>(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   
   const {
     transcript,
@@ -66,6 +79,12 @@ export default function VoiceInterviewSession({
   // Auto-speak question and then auto-start recording for real-time flow
   useEffect(() => {
     if (currentQuestion && !isAnswering && !isSubmitting) {
+      // Reset question audio for new question
+      setQuestionAudioUrl(null);
+      
+      // Capture AI voice as audio
+      captureQuestionAudio(currentQuestion.text);
+      
       // Speak the question
       speak(currentQuestion.text);
       
@@ -84,6 +103,83 @@ export default function VoiceInterviewSession({
     }
   }, [currentQuestion]);
 
+  // Capture AI question audio using speech synthesis
+  const captureQuestionAudio = async (text: string) => {
+    try {
+      // Use Web Speech API to generate audio and capture it
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      
+      // Note: Web Speech API doesn't provide direct audio capture
+      // We'll generate the audio via TTS and the user can replay via the speak function
+      // Store the text for replay purposes
+      const audioData = {
+        text: text,
+        timestamp: Date.now()
+      };
+      
+      // In a production app, you'd use a TTS service that returns audio files
+      // For now, we'll just store a marker that we can use to replay
+      setQuestionAudioUrl(JSON.stringify(audioData));
+    } catch (error) {
+      console.error('Error capturing question audio:', error);
+    }
+  };
+
+  // Start recording user's audio answer
+  const startAudioRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      recorder.start();
+      setIsRecordingAudio(true);
+    } catch (error) {
+      console.error('Error starting audio recording:', error);
+      setError('Failed to access microphone for recording');
+    }
+  };
+
+  // Stop recording and convert to base64
+  const stopAudioRecording = async (): Promise<string | null> => {
+    return new Promise((resolve) => {
+      if (!mediaRecorderRef.current) {
+        resolve(null);
+        return;
+      }
+
+      mediaRecorderRef.current.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const reader = new FileReader();
+        
+        reader.onloadend = () => {
+          const base64Audio = reader.result as string;
+          setIsRecordingAudio(false);
+          
+          // Stop all tracks
+          if (mediaRecorderRef.current?.stream) {
+            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+          }
+          
+          resolve(base64Audio);
+        };
+        
+        reader.readAsDataURL(audioBlob);
+      };
+
+      mediaRecorderRef.current.stop();
+    });
+  };
+
   // Check browser support
   useEffect(() => {
     if (!speechSupported || !ttsSupported) {
@@ -98,6 +194,7 @@ export default function VoiceInterviewSession({
     resetTranscript();
     startTimeRef.current = Date.now();
     startListening();
+    startAudioRecording(); // Start recording audio
   };
 
   const handleStopAnswering = () => {
@@ -116,6 +213,9 @@ export default function VoiceInterviewSession({
 
     const speakingDuration = Math.floor((Date.now() - startTimeRef.current) / 1000);
 
+    // Stop audio recording and get base64 data
+    const answerAudioUrl = await stopAudioRecording();
+
     try {
       const response = await fetch('/api/mock-interview/answer', {
         method: 'POST',
@@ -126,6 +226,8 @@ export default function VoiceInterviewSession({
           answer: transcript,
           transcript: transcript,
           speakingDuration,
+          answerAudioUrl, // Send recorded audio
+          questionAudioUrl, // Send question audio marker
         }),
       });
 
@@ -135,14 +237,32 @@ export default function VoiceInterviewSession({
         throw new Error(data.error || 'Failed to submit answer');
       }
 
+      console.log('Answer submitted successfully:', {
+        currentQuestionId: currentQuestion.id,
+        currentQuestionNumber: currentQuestionIndex + 1,
+        isComplete: data.isComplete,
+      });
+
       // Check if interview is complete
-      if (data.interviewComplete) {
-        setInterviewComplete(true);
-      } else if (data.nextQuestion) {
-        // Immediately move to next question for real-time flow
-        setCurrentQuestion(data.nextQuestion);
-        setQuestionCount(prev => prev + 1);
-        resetTranscript();
+      if (data.isComplete || data.interviewComplete) {
+        // Auto-complete the interview
+        await handleCompleteInterview();
+      } else {
+        // Move to next pre-generated question
+        const nextIndex = currentQuestionIndex + 1;
+        if (nextIndex < allQuestions.length) {
+          console.log('Moving to next pre-generated question:', {
+            from: currentQuestionIndex,
+            to: nextIndex,
+            questionText: allQuestions[nextIndex].text.substring(0, 50) + '...'
+          });
+          setCurrentQuestionIndex(nextIndex);
+          setCurrentQuestion(allQuestions[nextIndex]);
+          resetTranscript();
+        } else {
+          // All questions answered, complete interview
+          await handleCompleteInterview();
+        }
       }
     } catch (err: any) {
       console.error('Error submitting answer:', err);
@@ -164,8 +284,11 @@ export default function VoiceInterviewSession({
         throw new Error(data.error || 'Failed to complete interview');
       }
 
-      // Navigate to results page
-      router.push(`/mock-interview/results/${interviewId}`);
+      // Navigate to mock interview list page with success message
+      router.push('/mock-interview');
+      
+      // Show toast notification
+      showToast('success', 'Interview saved successfully! Your results will be ready shortly.');
     } catch (err: any) {
       console.error('Error completing interview:', err);
       setError(err.message || 'Failed to complete interview');
@@ -196,42 +319,18 @@ export default function VoiceInterviewSession({
     );
   }
 
-  // Interview complete screen
-  if (interviewComplete) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <div className="card p-8 max-w-md text-center">
-          <CheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: '#10b981' }} />
-          <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--text-strong)' }}>
-            Interview Complete!
-          </h2>
-          <p className="mb-6" style={{ color: 'var(--text-muted)' }}>
-            Great job! Click below to view your detailed feedback and performance analysis.
-          </p>
-          <button
-            onClick={handleCompleteInterview}
-            className="px-8 py-3 rounded-lg font-semibold transition-all"
-            style={{ backgroundColor: 'var(--accent)', color: 'white' }}
-          >
-            View Results
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   // Main interview UI
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)' }}>
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-6">
           <div>
             <div className="text-sm mb-1" style={{ color: 'var(--text-muted)' }}>
               Mock Interview Session
             </div>
             <div className="text-lg font-semibold" style={{ color: 'var(--text-strong)' }}>
-              Question {questionCount} of 5
+              Question {currentQuestionIndex + 1} of {totalQuestions}
             </div>
           </div>
           <button
@@ -250,56 +349,60 @@ export default function VoiceInterviewSession({
           </button>
         </div>
 
-        {/* Question Display */}
-        <div className="card p-8 mb-6">
-          <div className="flex items-start gap-4">
-            {isSpeaking && !isAnswering && (
-              <div className="flex-shrink-0">
+        {/* Side by Side Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Question Panel */}
+          <div className="card p-6 flex flex-col h-[450px]">
+            <div className="flex items-center gap-2 mb-4">
+              {isSpeaking && !isAnswering && (
                 <div 
-                  className="w-12 h-12 rounded-full flex items-center justify-center animate-pulse"
+                  className="w-8 h-8 rounded-full flex items-center justify-center animate-pulse"
                   style={{ backgroundColor: 'var(--accent-soft)' }}
                 >
-                  <Volume2 className="w-6 h-6" style={{ color: 'var(--accent)' }} />
+                  <Volume2 className="w-4 h-4" style={{ color: 'var(--accent)' }} />
                 </div>
+              )}
+              <div className="text-sm font-semibold" style={{ color: 'var(--accent)' }}>
+                Question {currentQuestionIndex + 1}
               </div>
-            )}
-            <div className="flex-1">
-              <div className="text-sm font-medium mb-2" style={{ color: 'var(--accent)' }}>
-                Question:
-              </div>
-              <h2 className="text-xl md:text-2xl font-semibold leading-relaxed" style={{ color: 'var(--text-strong)' }}>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <p className="text-lg leading-relaxed" style={{ color: 'var(--text-strong)' }}>
                 {currentQuestion.text}
-              </h2>
+              </p>
             </div>
           </div>
-        </div>
 
-        {/* Transcript Display */}
-        <div className="card p-6 mb-6 min-h-[250px]">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--text-strong)' }}>
-              {isAnswering && <Mic className="w-5 h-5 text-red-500 animate-pulse" />}
-              {isAnswering ? 'Recording Your Answer' : isSpeaking ? 'AI Speaking' : 'Your Answer'}
-            </h3>
-            {isListening && (
+          {/* Answer Panel */}
+          <div className="card p-6 flex flex-col h-[450px]">
+            <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-red-500 font-medium">Live</span>
+                {isAnswering && <Mic className="w-4 h-4 text-red-500 animate-pulse" />}
+                <div className="text-sm font-semibold" style={{ color: 'var(--text-strong)' }}>
+                  {isAnswering ? 'Recording Your Answer' : 'Your Answer'}
+                </div>
               </div>
-            )}
-          </div>
-          <div className="text-lg leading-relaxed p-4 rounded-lg min-h-[150px]" style={{ 
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-normal)',
-          }}>
-            {transcript || interimTranscript || (
-              <span style={{ color: 'var(--text-muted)' }}>
-                {isAnswering ? 'Speak your answer...' : isSpeaking ? 'Listen to the question...' : 'Waiting to start recording...'}
-              </span>
-            )}
-            {interimTranscript && (
-              <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}> {interimTranscript}</span>
-            )}
+              {isListening && (
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-red-500 font-medium">Live</span>
+                </div>
+              )}
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 rounded-lg" style={{ 
+              backgroundColor: 'var(--bg-secondary)',
+            }}>
+              <p className="text-base leading-relaxed" style={{ color: 'var(--text-normal)' }}>
+                {transcript || interimTranscript || (
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                    {isAnswering ? 'Speak your answer...' : isSpeaking ? 'Listen to the question...' : 'Waiting to start recording...'}
+                  </span>
+                )}
+                {interimTranscript && (
+                  <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}> {interimTranscript}</span>
+                )}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -316,15 +419,15 @@ export default function VoiceInterviewSession({
           </div>
         )}
 
-        {/* Controls */}
-        <div className="flex flex-col md:flex-row gap-4 justify-center">
+        {/* Controls - Below both panels */}
+        <div className="flex flex-wrap gap-4 justify-center">
           {!isAnswering ? (
             <>
               {!isSpeaking && (
                 <button
                   onClick={handleStartAnswering}
                   disabled={isSpeaking || isSubmitting}
-                  className="px-8 py-4 rounded-lg font-semibold text-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ backgroundColor: '#10b981', color: 'white' }}
                 >
                   <Mic className="w-5 h-5" />
@@ -335,21 +438,21 @@ export default function VoiceInterviewSession({
                 <button
                   onClick={handleSubmitAnswer}
                   disabled={isSubmitting || isSpeaking}
-                  className="px-8 py-4 rounded-lg font-semibold text-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ backgroundColor: 'var(--accent)', color: 'white' }}
                 >
                   <Send className="w-5 h-5" />
-                  Submit & Continue
+                  {currentQuestionIndex >= totalQuestions - 1 ? 'Submit & Finish' : 'Submit & Continue'}
                 </button>
               )}
               {isSubmitting && (
-                <div className="text-center py-4" style={{ color: 'var(--text-normal)' }}>
+                <div className="text-center py-3" style={{ color: 'var(--text-normal)' }}>
                   <div className="inline-flex items-center gap-3">
                     <svg className="animate-spin h-5 w-5" style={{ color: 'var(--accent)' }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span>Processing your answer...</span>
+                    <span>Saving your answer...</span>
                   </div>
                 </div>
               )}
@@ -358,7 +461,7 @@ export default function VoiceInterviewSession({
             <button
               onClick={handleStopAnswering}
               disabled={isSubmitting}
-              className="px-8 py-4 rounded-lg font-semibold text-lg flex items-center justify-center gap-2 transition-all"
+              className="px-6 py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all"
               style={{ backgroundColor: '#ef4444', color: 'white' }}
             >
               <Square className="w-5 h-5" />

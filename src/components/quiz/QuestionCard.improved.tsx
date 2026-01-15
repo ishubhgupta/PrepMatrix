@@ -40,7 +40,6 @@ export function QuestionCard({
   const [isGeneratingSimilar, setIsGeneratingSimilar] = useState(false);
   const [isExplaining, setIsExplaining] = useState(false);
   const [explanationLevel, setExplanationLevel] = useState<'simple' | 'detailed' | 'advanced'>('simple');
-  const [confidence, setConfidence] = useState<'very' | 'somewhat' | 'guessing'>('somewhat');
   const [startTime] = useState(Date.now());
   
   // Hint system
@@ -124,7 +123,6 @@ export function QuestionCard({
             questionId: question.id,
             selectedAnswer: ['A', 'B', 'C', 'D'][selectedOption],
             isCorrect,
-            confidence,
             timeSpent,
           }),
         });
@@ -454,7 +452,7 @@ export function QuestionCard({
                     : 'bg-white border-2 border-black/10 hover:border-[color:var(--accent)] hover:bg-[color:var(--accent-soft)] text-[color:var(--text-strong)]'
                 }`}
               >
-                🎯 Eliminate 2 Options (-10%)
+                Eliminate 2 Options
               </button>
               <button
                 type="button"
@@ -466,7 +464,7 @@ export function QuestionCard({
                     : 'bg-white border-2 border-black/10 hover:border-[color:var(--accent)] hover:bg-[color:var(--accent-soft)] text-[color:var(--text-strong)]'
                 }`}
               >
-                💡 Get Hint (-10%)
+                Get Hint
               </button>
               <button
                 type="button"
@@ -478,7 +476,7 @@ export function QuestionCard({
                     : 'bg-white border-2 border-black/10 hover:border-[color:var(--accent)] hover:bg-[color:var(--accent-soft)] text-[color:var(--text-strong)]'
                 }`}
               >
-                📖 Show Explanation (-10%)
+                Show Explanation
               </button>
             </div>
 
@@ -511,49 +509,6 @@ export function QuestionCard({
         {/* Submit Button */}
         {!showAnswer && (
           <div className="space-y-4">
-            {session?.user && selectedOption !== null && (
-              <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--accent-soft)' }}>
-                <label className="block text-sm font-medium mb-3" style={{ color: 'var(--text-strong)' }}>
-                  How confident are you?
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setConfidence('very')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                      confidence === 'very'
-                        ? 'bg-[color:var(--accent)] text-white shadow-md scale-[1.02]'
-                        : 'bg-white text-[color:var(--text-muted)] hover:bg-[color:var(--accent-soft)]'
-                    }`}
-                  >
-                    Very Sure
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfidence('somewhat')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                      confidence === 'somewhat'
-                        ? 'bg-[color:var(--accent)] text-white shadow-md scale-[1.02]'
-                        : 'bg-white text-[color:var(--text-muted)] hover:bg-[color:var(--accent-soft)]'
-                    }`}
-                  >
-                    Somewhat
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setConfidence('guessing')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                      confidence === 'guessing'
-                        ? 'bg-[color:var(--accent)] text-white shadow-md scale-[1.02]'
-                        : 'bg-white text-[color:var(--text-muted)] hover:bg-[color:var(--accent-soft)]'
-                    }`}
-                  >
-                    Guessing
-                  </button>
-                </div>
-              </div>
-            )}
-            
             <button
               onClick={handleSubmit}
               disabled={selectedOption === null}

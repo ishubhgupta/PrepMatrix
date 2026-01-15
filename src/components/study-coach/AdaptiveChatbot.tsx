@@ -172,7 +172,7 @@ export function AdaptiveChatbot() {
       />
 
       {/* Chat Modal */}
-      <div className="relative w-full max-w-3xl h-[700px] rounded-2xl shadow-2xl flex flex-col overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
+      <div className="relative w-full max-w-3xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden" style={{ backgroundColor: 'var(--bg-card)' }}>
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'rgba(0,0,0,0.08)', background: 'linear-gradient(135deg, rgba(var(--accent-rgb), 0.05), rgba(147, 51, 234, 0.05))' }}>
           <div className="flex items-center space-x-3">
@@ -280,73 +280,76 @@ export function AdaptiveChatbot() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        <div className="p-5 border-t" style={{ borderColor: 'rgba(0,0,0,0.08)', background: 'rgba(0,0,0,0.01)' }}>
-          <div className="flex space-x-3">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask me anything about your studies..."
-              disabled={isLoading}
-              className="flex-1 px-4 py-3 rounded-xl border-2 border-black/8 focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent)]/20 outline-none transition-all text-sm disabled:opacity-50"
-              style={{ background: 'var(--bg-bone)', color: 'var(--text-strong)' }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!input.trim() || isLoading}
-              className="px-5 py-3 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all flex items-center gap-2"
-              style={{ background: 'linear-gradient(135deg, var(--accent), #9333ea)' }}
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Send className="w-5 h-5" />
-              )}
-            </button>
+        {/* Input & Quick Actions */}
+        <div className="border-t" style={{ borderColor: 'rgba(0,0,0,0.08)', background: 'rgba(0,0,0,0.01)' }}>
+          {/* Quick Actions */}
+          <div className="px-5 pt-3 pb-2">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setInput("Explain this in simple terms")}
+                className="px-3 py-1.5 text-xs rounded-lg hover:shadow-md transition-all font-medium"
+                style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.08)', color: 'var(--accent)' }}
+                disabled={isLoading}
+              >
+                Simplify explanation
+              </button>
+              <button
+                onClick={() => setInput("Give me an example")}
+                className="px-3 py-1.5 text-xs rounded-lg hover:shadow-md transition-all font-medium"
+                style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)', color: '#3b82f6' }}
+                disabled={isLoading}
+              >
+                Show example
+              </button>
+              <button
+                onClick={() => setInput("I don't understand, explain differently")}
+                className="px-3 py-1.5 text-xs rounded-lg hover:shadow-md transition-all font-medium"
+                style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', color: '#ef4444' }}
+                disabled={isLoading}
+              >
+                Explain differently
+              </button>
+              <button
+                onClick={() => setInput("Quiz me on this topic")}
+                className="px-3 py-1.5 text-xs rounded-lg hover:shadow-md transition-all font-medium"
+                style={{ backgroundColor: 'rgba(168, 85, 247, 0.08)', color: '#a855f7' }}
+                disabled={isLoading}
+              >
+                Quiz me
+              </button>
+            </div>
           </div>
-          <p className="text-xs mt-2 px-1" style={{ color: 'var(--text-muted)' }}>
-            Press Enter to send • I adapt to your learning style
-          </p>
-        </div>
 
-        {/* Quick Actions */}
-        <div className="px-5 pb-5">
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setInput("Explain this in simple terms")}
-              className="px-3 py-1.5 text-xs rounded-lg hover:shadow-md transition-all font-medium"
-              style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.08)', color: 'var(--accent)' }}
-              disabled={isLoading}
-            >
-              Simplify explanation
-            </button>
-            <button
-              onClick={() => setInput("Give me an example")}
-              className="px-3 py-1.5 text-xs rounded-lg hover:shadow-md transition-all font-medium"
-              style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)', color: '#3b82f6' }}
-              disabled={isLoading}
-            >
-              Show example
-            </button>
-            <button
-              onClick={() => setInput("I don't understand, explain differently")}
-              className="px-3 py-1.5 text-xs rounded-lg hover:shadow-md transition-all font-medium"
-              style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', color: '#ef4444' }}
-              disabled={isLoading}
-            >
-              Explain differently
-            </button>
-            <button
-              onClick={() => setInput("Quiz me on this topic")}
-              className="px-3 py-1.5 text-xs rounded-lg hover:shadow-md transition-all font-medium"
-              style={{ backgroundColor: 'rgba(168, 85, 247, 0.08)', color: '#a855f7' }}
-              disabled={isLoading}
-            >
-              Quiz me
-            </button>
+          {/* Input */}
+          <div className="p-5 pt-3">
+            <div className="flex space-x-3">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Ask me anything about your studies..."
+                disabled={isLoading}
+                className="flex-1 px-4 py-3 rounded-xl border-2 border-black/8 focus:border-[color:var(--accent)] focus:ring-2 focus:ring-[color:var(--accent)]/20 outline-none transition-all text-sm disabled:opacity-50"
+                style={{ background: 'var(--bg-bone)', color: 'var(--text-strong)' }}
+              />
+              <button
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading}
+                className="px-5 py-3 text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all flex items-center gap-2"
+                style={{ background: 'linear-gradient(135deg, var(--accent), #9333ea)' }}
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+            <p className="text-xs mt-2 px-1" style={{ color: 'var(--text-muted)' }}>
+              Press Enter to send • I adapt to your learning style
+            </p>
           </div>
         </div>
       </div>
