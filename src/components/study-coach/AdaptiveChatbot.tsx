@@ -51,6 +51,7 @@ export function AdaptiveChatbot() {
       };
       setMessages([welcomeMessage]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const handleSend = async () => {

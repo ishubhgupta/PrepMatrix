@@ -169,10 +169,10 @@ export default function SignUpPage() {
                 What you'll get:
               </h3>
               <ul className="text-sm space-y-1" style={{ color: '#16a34a' }}>
-                <li>✓ Spaced repetition learning</li>
+                <li>✓ AI-powered mock interviews</li>
                 <li>✓ Personal error notebook</li>
                 <li>✓ Progress tracking & analytics</li>
-                <li>✓ Custom study plans</li>
+                <li>✓ Custom AI-generated quizzes</li>
               </ul>
             </div>
           </div>

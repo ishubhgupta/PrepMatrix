@@ -109,7 +109,7 @@ export default function SignInPage() {
           <div className="mt-8 p-4 rounded-lg" style={{ backgroundColor: 'var(--accent-soft)' }}>
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
               <strong>Note:</strong> You can continue using all current features without logging in. 
-              Sign in to unlock spaced repetition, error tracking, and personalized study plans.
+              Sign in to unlock AI mock interviews, error tracking, and personalized analytics.
             </p>
           </div>
         </div>

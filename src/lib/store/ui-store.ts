@@ -45,6 +45,8 @@ const defaultPreferences: UserPreferences = {
   autoRevealRationale: false,
   playSuccessSounds: true,
   keyboardShortcuts: true,
+  soundEffects: true,
+  notifications: true,
 };
 
 const defaultFilters: QuizFilters = {

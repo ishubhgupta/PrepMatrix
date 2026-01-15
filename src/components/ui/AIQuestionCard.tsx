@@ -108,13 +108,13 @@ export function AIQuestionCard({
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <span className={`px-2 py-1 rounded text-xs font-medium ${
-                  originalDifficulty === 'Easy' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200' :
-                  originalDifficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200' :
+                  originalDifficulty === 'Easy' ? 'bg-green-100 text-green-800 dark:bg-green-200/30 dark:text-green-900' :
+                  originalDifficulty === 'Medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-200/30 dark:text-yellow-700' :
                   'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200'
                 }`}>
                   {originalDifficulty}
                 </span>
-                <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-xs font-medium">
+                <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-900 rounded text-xs font-medium">
                   {originalTopic}
                 </span>
               </div>
@@ -199,12 +199,27 @@ export function AIQuestionCard({
             {/* Explanation */}
             {showAnswer && (
               <div className="space-y-4">
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                <div className="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800">
+                  <h4 className="font-semibold text-blue-900 dark:text-blue-900 mb-3 flex items-center gap-2 text-base">
+                    <Lightbulb className="w-5 h-5" />
                     AI Explanation
                   </h4>
-                  <div className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed prose prose-sm prose-blue max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0">
-                    <ReactMarkdown>{generatedQuestion.explanation}</ReactMarkdown>
+                  <div className="text-sm text-blue-900 dark:text-blue-900 leading-loose whitespace-pre-wrap">
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => <p className="mb-3 last:mb-0 text-sm leading-loose">{children}</p>,
+                        ul: ({ children }) => <ul className="list-disc list-outside ml-5 space-y-2 my-3">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal list-outside ml-5 space-y-2 my-3">{children}</ol>,
+                        li: ({ children }) => <li className="text-sm leading-loose">{children}</li>,
+                        strong: ({ children }) => <strong className="font-semibold text-blue-950 dark:text-blue-50">{children}</strong>,
+                        code: ({ children }) => <code className="text-sm font-mono bg-blue-100 dark:bg-blue-900/50 px-1.5 py-0.5 rounded">{children}</code>,
+                        h1: ({ children }) => <h1 className="text-base font-bold mb-2 mt-3">{children}</h1>,
+                        h2: ({ children }) => <h2 className="text-base font-bold mb-2 mt-3">{children}</h2>,
+                        h3: ({ children }) => <h3 className="text-sm font-bold mb-2 mt-2">{children}</h3>,
+                      }}
+                    >
+                      {generatedQuestion.explanation}
+                    </ReactMarkdown>
                   </div>
                 </div>
 

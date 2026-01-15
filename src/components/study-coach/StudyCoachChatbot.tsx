@@ -49,6 +49,7 @@ export function StudyCoachChatbot({ initialTopic, initialContext, isOpen, onClos
       };
       setMessages([welcomeMessage]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialTopic, initialContext]);
 
   const handleSend = async () => {

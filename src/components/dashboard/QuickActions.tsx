@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { Play, Brain, AlertTriangle, RotateCcw, Sparkles, BookOpen, Target, Mic } from 'lucide-react';
+import { Play, Brain, AlertTriangle, Sparkles, BookOpen, Target, Mic } from 'lucide-react';
 
 export function QuickActions() {
   const { data: session } = useSession();
@@ -35,14 +35,6 @@ export function QuickActions() {
       href: '/errors',
       color: '#ef4444',
       bgColor: '#fef2f2',
-    },
-    {
-      title: 'Spaced Repetition',
-      description: 'Questions due for review',
-      icon: RotateCcw,
-      href: '/confidence',
-      color: '#f59e0b',
-      bgColor: '#fffbeb',
     },
     {
       title: 'AI Study Coach',

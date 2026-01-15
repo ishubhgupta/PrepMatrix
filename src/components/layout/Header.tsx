@@ -300,9 +300,6 @@ export function Header() {
                 <Link href="/errors" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
                   Error Notebook
                 </Link>
-                <Link href="/confidence" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
-                  Confidence Analysis
-                </Link>
                 <Link href="/custom-quiz" onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2 text-base font-medium rounded-lg text-[color:var(--text-muted)]">
                   AI Quiz Generator
                 </Link>

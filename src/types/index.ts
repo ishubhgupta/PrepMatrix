@@ -100,6 +100,8 @@ export interface UserPreferences {
   autoRevealRationale: boolean;
   playSuccessSounds: boolean;
   keyboardShortcuts: boolean;
+  soundEffects: boolean;
+  notifications: boolean;
 }
 
 // API types for Gemini integration
